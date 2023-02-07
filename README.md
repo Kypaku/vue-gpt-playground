@@ -1,5 +1,11 @@
 # vue-gpt-sample
 To get an API KEY you need to register new OPEN API account and then visit https://platform.openai.com/account/api-keys
+
+## Clone:
+```
+git clone https://github.com/Kypaku/vue-gpt-example
+```
+
 ## Project setup
 ```
 npm install
