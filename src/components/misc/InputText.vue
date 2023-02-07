@@ -27,7 +27,7 @@
 </template>
 
 <script lang='ts'>
-    import { localeIncludes, localeStart } from "@/helpers/node_gm_common";
+    import { localeIncludes, localeStart } from "@/helpers";
     import { defineComponent, PropType } from "vue";
 
     export interface InputTextSuggestion {

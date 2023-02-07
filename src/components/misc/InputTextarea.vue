@@ -1,13 +1,15 @@
 <template>
     <div class="input-text">
-        <label :for="id" class="mr-2">{{label}}</label>
+        <div>
+            <label :for="id" class="mr-2">{{label}}</label>
+        </div>
         <textarea
             type="text"
             class="border-2"
             ref="input"
             :id="id"
             :value="value"
-            v-bind="$attrs"
+            v-bind="{...$attrs, class: 'w-full'}"
             :placeholder="placeholder"
             :disabled="disabled"
             @keydown.tab.exact.prevent="suggestions && suggest(suggestionsFiltered[0])"
@@ -28,7 +30,7 @@
 </template>
 
 <script lang='ts'>
-    import { localeIncludes, localeStart } from '@/helpers/node_gm_common'
+    import { localeIncludes, localeStart } from '@/helpers'
     import { defineComponent, PropType } from 'vue'
 
     export interface InputTextSuggestion {
