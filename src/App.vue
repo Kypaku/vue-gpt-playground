@@ -17,17 +17,21 @@
             />
             <Tabs v-model:value="tab" :tabs="tabs" class="mt-8"/>
             <div class="description mt-4">
-                <a target="_blank" :href="tab === 'code' ? 'https://platform.openai.com/docs/guides/code' : 'https://platform.openai.com/docs/guides/completion'">API Guide</a>
+                <a target="_blank" :href="currentGuide">API Guide</a>
             </div>
             <InputTextarea v-model:value="promt" :label="'Promt:'" class="w-1/2 mt-8" :rows="10"/>
             <button @click="run" class="mt-2 bg-gray-300 px-2 py-1">{{isLoading ? 'Loading...' : 'Run'}}</button>
-            <InputTextarea v-model:value="result" :label="'Result:'" disabled class="mt-8 w-1/2" :rows="10"/>
+            <div class="image-wrapper" v-if="tab === 'image'">
+                <span>Result:</span>
+                <img :src="result" alt="result" v-if="result"/>
+            </div>
+            <InputTextarea v-else v-model:value="result" :label="'Result:'" disabled class="mt-8 w-1/2" :rows="10"/>
         </div>
     </div>
 </template>
 
 <script lang='ts'>
-    import api from "./api/openai";
+    import SimpleGPT from "./api/openai";
     import { defineComponent } from "@vue/runtime-core";
     import InputText from "./components/misc/InputText.vue";
     import InputTextarea from "./components/misc/InputTextarea.vue";
@@ -42,27 +46,40 @@
         },
         data() {
             return {
+                guides: {
+                    code: "https://platform.openai.com/docs/guides/code",
+                    text: "https://platform.openai.com/docs/guides/completion",
+                    image: "https://platform.openai.com/docs/guides/images/introduction",
+                },
                 tab: "",
                 tabs: [
                     { label: "Text", value: "" },
                     { label: "Code", value: "code" },
+                    { label: "Image", value: "image" },
                 ] as ITab[],
                 result: "",
                 isLoading: false,
                 promt: "",
-                apiKey: "",
-                api,
+                apiKey: process.env.OPENAI_API_KEY || "",
+                api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
             };
         },
         computed: {
+            currentGuide(): string {
+                return (this.guides as {[key: string]: string})[this.tab] || this.guides.text;
+            },
 
         },
         methods: {
             async run() {
                 if (!this.isLoading) {
                     this.isLoading = true;
+                    const handlers = {
+                        code: 'getCodeFirst',
+                        image: 'getImage',
+                    } as {[key: string]: string}
                     try {
-                        const res = await api[this.tab === "code" ? "getCodeFirst" : "getFirst"](this.promt);
+                        const res = await (this.api as any)[(handlers[this.tab] || 'getFirst')](this.promt);
                         this.result = res || "";
                     } catch (e) {
                         console.error("App error: " + e);
