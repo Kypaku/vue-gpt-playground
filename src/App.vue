@@ -18,6 +18,11 @@
         @update:value="(val) => api.setApiKey(val)"
         placeholder="Paste a key here"
       />
+      <button @click="showSettings">
+        <span v-if="!settings">Settings</span>
+        <span v-else style="color: red">Close settings &#215;</span>
+      </button>
+      <QuerySettings v-if="settings"></QuerySettings>
       <Tabs v-model:value="tab" :tabs="tabs" class="mt-8" />
       <div class="description mt-4">
         <a target="_blank" :href="currentGuide">API Guide</a>
@@ -53,11 +58,13 @@ import { defineComponent } from "@vue/runtime-core";
 import InputText from "./components/misc/InputText.vue";
 import InputTextarea from "./components/misc/InputTextarea.vue";
 import Tabs, { ITab } from "./components/misc/Tabs.vue";
+import QuerySettings from "./components/misc/QuerySettings.vue";
 export default defineComponent({
   components: {
     Tabs,
     InputTextarea,
     InputText,
+    QuerySettings,
   },
   data() {
     return {
@@ -66,6 +73,7 @@ export default defineComponent({
         text: "https://platform.openai.com/docs/guides/completion",
         image: "https://platform.openai.com/docs/guides/images/introduction",
       },
+      settings: false,
       tab: "",
       tabs: [
         { label: "Text", value: "" },
@@ -87,6 +95,9 @@ export default defineComponent({
     },
   },
   methods: {
+    showSettings() {
+      this.settings = !this.settings;
+    },
     async run() {
       if (!this.isLoading) {
         this.isLoading = true;
