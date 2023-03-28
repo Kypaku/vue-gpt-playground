@@ -22,7 +22,6 @@
       <div class="description mt-4">
         <a target="_blank" :href="currentGuide">API Guide</a>
       </div>
-      <button @click="getModelsList">GetModelsList</button>
       <InputTextarea
         v-model:value="promt"
         :label="'Promt:'"
@@ -54,7 +53,6 @@ import { defineComponent } from "@vue/runtime-core";
 import InputText from "./components/misc/InputText.vue";
 import InputTextarea from "./components/misc/InputTextarea.vue";
 import Tabs, { ITab } from "./components/misc/Tabs.vue";
-
 export default defineComponent({
   components: {
     Tabs,
@@ -107,10 +105,6 @@ export default defineComponent({
           this.isLoading = false;
         }
       }
-    },
-    async getModelsList() {
-      const res = await this.api.getModels();
-      console.log(res);
     },
   },
 });
