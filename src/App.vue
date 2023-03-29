@@ -11,6 +11,7 @@
           https://platform.openai.com/account/api-keys
         </a>
       </div>
+
       <InputText
         v-model:value="apiKey"
         :label="'API Key:'"
@@ -18,15 +19,23 @@
         @update:value="(val) => api.setApiKey(val)"
         placeholder="Paste a key here"
       />
+
       <button @click="showSettings">
         <span v-if="!settings">Settings</span>
         <span v-else style="color: red">Close settings &#215;</span>
       </button>
-      <QuerySettings v-if="settings"></QuerySettings>
+
+      <QuerySettings
+        v-if="settings"
+        :opts="opts"
+        :changeMaxTokens="changeMaxTokens"
+      ></QuerySettings>
+
       <Tabs v-model:value="tab" :tabs="tabs" class="mt-8" />
       <div class="description mt-4">
         <a target="_blank" :href="currentGuide">API Guide</a>
       </div>
+
       <InputTextarea
         v-model:value="promt"
         :label="'Promt:'"
@@ -40,6 +49,7 @@
         <span>Result:</span>
         <img :src="result" alt="result" v-if="result" />
       </div>
+
       <InputTextarea
         v-else
         v-model:value="result"
@@ -74,6 +84,10 @@ export default defineComponent({
         image: "https://platform.openai.com/docs/guides/images/introduction",
       },
       settings: false,
+      opts: {
+        temperature: 0,
+        max_tokens: 500,
+      },
       tab: "",
       tabs: [
         { label: "Text", value: "" },
@@ -98,6 +112,10 @@ export default defineComponent({
     showSettings() {
       this.settings = !this.settings;
     },
+    changeMaxTokens(max: number) {
+      this.opts.max_tokens = max;
+      console.log(this.opts.max_tokens);
+    },
     async run() {
       if (!this.isLoading) {
         this.isLoading = true;
@@ -106,9 +124,17 @@ export default defineComponent({
           image: "getImage",
         } as { [key: string]: string };
         try {
-          const res = await (this.api as any)[handlers[this.tab] || "getFirst"](
-            this.promt
-          );
+          let res: any = null;
+          if (this.tab === "image") {
+            res = await (this.api as any)[handlers[this.tab] || "getFirst"](
+              this.promt
+            );
+          } else {
+            res = await (this.api as any)[handlers[this.tab] || "getFirst"](
+              this.promt,
+              this.opts
+            );
+          }
           this.result = res || "";
         } catch (e) {
           console.error("App error: " + e);
