@@ -3,7 +3,7 @@
         <div class="text-2xl w-full text-center mt-10"><b>Vue.js GPT API Sample:</b></div>
         <div class="main container mx-auto mt-10">
             <div class="mt-4">
-                To get an API KEY you need to register new OPEN API account and then visit
+                To get an API KEY you need to register new OPEN AI account and then visit
                 <a href="https://platform.openai.com/account/api-keys" target="_blank">
                     https://platform.openai.com/account/api-keys
                 </a>
