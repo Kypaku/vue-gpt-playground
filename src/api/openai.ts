@@ -20,7 +20,7 @@ export default class SimpleGPT {
 
     async get(
         prompt: string,
-        opts?: Partial<CreateCompletionRequest>
+        opts?: CreateCompletionRequest
     ): Promise<null | string[]> {
         if (!this._openai) return null;
         const response = await this._openai.createCompletion({
@@ -39,14 +39,14 @@ export default class SimpleGPT {
 
     async getFirst(
         promt: string,
-        opts?: Partial<CreateCompletionRequest>
+        opts?: CreateCompletionRequest
     ): Promise<string | undefined> {
         return (await this.get(promt, opts))?.[0];
     }
 
     async getCode(
         prompt: string,
-        opts?: Partial<CreateCompletionRequest>
+        opts?: CreateCompletionRequest
     ): Promise<null | string[]> {
         if (!this._openai) return null;
         const response = await this._openai.createCompletion({
@@ -65,7 +65,7 @@ export default class SimpleGPT {
 
     async getCodeFirst(
         prompt: string,
-        opts?: Partial<CreateCompletionRequest>
+        opts?: CreateCompletionRequest
     ): Promise<string | undefined> {
         return (await this.getCode(prompt, opts))?.[0];
     }
@@ -94,13 +94,7 @@ export default class SimpleGPT {
     }
 
     setApiKey(key: string) {
-        const savedKey = window.localStorage.getItem("key");
-        if (savedKey) {
-            this._key = savedKey;
-        } else if (key) {
-            window.localStorage.setItem("key", key);
-            this._key = key;
-        }
+        this._key = key;
         this._configuration = new Configuration({
             apiKey: this._key,
         });
