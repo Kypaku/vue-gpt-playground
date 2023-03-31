@@ -115,7 +115,7 @@ export default defineComponent({
             this.settings = !this.settings;
         },
         changeMaxTokens() {
-            console.log("MAX", this.opts.max_tokens);
+            console.log("MAX", this.opts);
         },
         async run() {
             if (!this.isLoading) {

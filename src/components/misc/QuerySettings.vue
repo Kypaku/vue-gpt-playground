@@ -8,14 +8,19 @@
     <div class="query-settings">
         <h3>Query-settings</h3>
         <br />
-        <input			
+        <input
             type="number"
             name="max_tokens"
             min="50"
             max="1000"
             placeholder="200"
-            value="200"
-			@input="$emit('update:value', newOpts)"          
+            :value="value?.max_tokens"
+            @input="$emit('update:value', {
+                    ...value,
+                    max_tokens: $event.target?.value,
+                }),
+				show()
+            "
         />
     </div>
 </template>
@@ -36,6 +41,7 @@ export default defineComponent({
     computed: {},
     methods: {
         show() {
+            console.log("!!!");
             if (this.changeMaxTokens) this.changeMaxTokens();
         },
     },
