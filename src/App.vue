@@ -29,7 +29,7 @@
 
             <QuerySettings
                 v-if="settings"
-                v-model:value="opts.max_tokens"
+                v-model:value="opts"
                 :changeMaxTokens="changeMaxTokens"
             >
             </QuerySettings>
@@ -87,7 +87,7 @@ export default defineComponent({
             settings: false,
             opts: {
                 temperature: 0,
-                max_tokens: 500,
+                max_tokens: 50,
             },
             tab: "",
             tabs: [

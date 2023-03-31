@@ -8,14 +8,14 @@
     <div class="query-settings">
         <h3>Query-settings</h3>
         <br />
-        <input
+        <input			
             type="number"
             name="max_tokens"
             min="50"
             max="1000"
             placeholder="200"
             value="200"
-			@input="$emit('update:value', newOpts), show()"          
+			@input="$emit('update:value', newOpts)"          
         />
     </div>
 </template>
@@ -26,7 +26,7 @@ import { CreateCompletionRequest } from "openai";
 
 export default defineComponent({
     props: {
-        value: Number, // Object as PropType<Partial<CreateCompletionRequest>>,
+        value: Object as PropType<Partial<CreateCompletionRequest>>,
         changeMaxTokens: Function,
     },
     components: {},
