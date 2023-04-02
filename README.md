@@ -1,5 +1,5 @@
 # vue-gpt-example
-To get an API KEY you need to register new OPEN API account and then visit https://platform.openai.com/account/api-keys
+To get an API KEY you need to register new OPEN AI account and then visit https://platform.openai.com/account/api-keys
 
 [Demo](http://kypaku.ru/pages/vue-gpt-example/)
 
@@ -27,6 +27,8 @@ npm run build
 ```
 npm run lint
 ```
+
+It uses copy of [gpt-simple-api-ts](https://github.com/Kypaku/gpt-simple-api)
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
