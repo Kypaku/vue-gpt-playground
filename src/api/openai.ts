@@ -29,6 +29,7 @@ export default class SimpleGPT {
             temperature: opts?.temperature || 0,
             max_tokens: opts?.max_tokens || 60,
             top_p: opts?.top_p || 1,
+            n: opts?.n || 1,
             frequency_penalty: opts?.frequency_penalty || 0.5,
             presence_penalty: opts?.presence_penalty || 0,
         });

@@ -23,13 +23,13 @@
             />
 
             <button @click="showSettings">
-                <span v-if="!settings">Settings</span>  
+                <span v-if="!settings">Settings</span>
                 <span v-else style="color: red">Close settings &#215;</span>
             </button>
 
             <QuerySettings
                 v-if="settings"
-                v-model:value="opts"
+                v-model:value="textOpts"
                 :changeMaxTokens="changeMaxTokens"
             >
             </QuerySettings>
@@ -85,9 +85,14 @@ export default defineComponent({
                 image: "https://platform.openai.com/docs/guides/images/introduction",
             },
             settings: false,
-            opts: {
+            textOpts: {
                 temperature: 0,
                 max_tokens: 50,
+                n: 1,
+            },
+            imageOpts: {
+                n: 1,
+                size: 512,
             },
             tab: "",
             tabs: [
@@ -115,7 +120,7 @@ export default defineComponent({
             this.settings = !this.settings;
         },
         changeMaxTokens() {
-            console.log("MAX", this.opts);
+            console.log("MAX", this.textOpts);
         },
         async run() {
             if (!this.isLoading) {
@@ -128,12 +133,12 @@ export default defineComponent({
                     let res: any = null;
                     if (this.tab === "image") {
                         res = await (this.api as any)[
-                            handlers[this.tab] || "getFirst"
-                        ](this.promt);
+                            handlers[this.tab] || "getImage"
+                        ](this.promt, this.imageOpts);
                     } else {
                         res = await (this.api as any)[
                             handlers[this.tab] || "getFirst"
-                        ](this.promt, this.opts);
+                        ](this.promt, this.textOpts);
                     }
                     this.result = res || "";
                 } catch (e) {
