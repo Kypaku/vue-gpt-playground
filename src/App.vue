@@ -64,92 +64,92 @@
 </template>
 
 <script lang="ts">
-import SimpleGPT from "./api/openai";
-import { defineComponent } from "@vue/runtime-core";
-import InputText from "./components/misc/InputText.vue";
-import InputTextarea from "./components/misc/InputTextarea.vue";
-import Tabs, { ITab } from "./components/misc/Tabs.vue";
-import QuerySettings from "./components/misc/QuerySettings.vue";
-export default defineComponent({
-    components: {
-        Tabs,
-        InputTextarea,
-        InputText,
-        QuerySettings,
-    },
-    data() {
-        return {
-            guides: {
-                code: "https://platform.openai.com/docs/guides/code",
-                text: "https://platform.openai.com/docs/guides/completion",
-                image: "https://platform.openai.com/docs/guides/images/introduction",
-            },
-            settings: false,
-            textOpts: {
-                temperature: 0,
-                max_tokens: 50,
-                n: 1,
-            },
-            imageOpts: {
-                n: 1,
-                size: 512,
-            },
-            tab: "",
-            tabs: [
-                { label: "Text", value: "" },
-                { label: "Code", value: "code" },
-                { label: "Image", value: "image" },
-            ] as ITab[],
-            result: "",
-            isLoading: false,
-            promt: "",
-            apiKey: process.env.OPENAI_API_KEY || "",
-            api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
-        };
-    },
-    computed: {
-        currentGuide(): string {
-            return (
-                (this.guides as { [key: string]: string })[this.tab] ||
-                this.guides.text
-            );
+    import SimpleGPT from "./api/openai";
+    import { defineComponent } from "@vue/runtime-core";
+    import InputText from "./components/misc/InputText.vue";
+    import InputTextarea from "./components/misc/InputTextarea.vue";
+    import Tabs, { ITab } from "./components/misc/Tabs.vue";
+    import QuerySettings from "./components/settings/QuerySettings.vue";
+    export default defineComponent({
+        components: {
+            Tabs,
+            InputTextarea,
+            InputText,
+            QuerySettings,
         },
-    },
-    methods: {
-        showSettings() {
-            this.settings = !this.settings;
+        data() {
+            return {
+                guides: {
+                    code: "https://platform.openai.com/docs/guides/code",
+                    text: "https://platform.openai.com/docs/guides/completion",
+                    image: "https://platform.openai.com/docs/guides/images/introduction",
+                },
+                settings: false,
+                textOpts: {
+                    temperature: 0,
+                    max_tokens: 50,
+                    n: 1,
+                },
+                imageOpts: {
+                    n: 1,
+                    size: 512,
+                },
+                tab: "",
+                tabs: [
+                    { label: "Text", value: "" },
+                    { label: "Code", value: "code" },
+                    { label: "Image", value: "image" },
+                ] as ITab[],
+                result: "",
+                isLoading: false,
+                promt: "",
+                apiKey: process.env.OPENAI_API_KEY || "",
+                api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
+            };
         },
-        changeMaxTokens() {
-            console.log("MAX", this.textOpts);
+        computed: {
+            currentGuide(): string {
+                return (
+                    (this.guides as { [key: string]: string })[this.tab] ||
+                    this.guides.text
+                );
+            },
         },
-        async run() {
-            if (!this.isLoading) {
-                this.isLoading = true;
-                const handlers = {
-                    code: "getCodeFirst",
-                    image: "getImage",
-                } as { [key: string]: string };
-                try {
-                    let res: any = null;
-                    if (this.tab === "image") {
-                        res = await (this.api as any)[
-                            handlers[this.tab] || "getImage"
-                        ](this.promt, this.imageOpts);
-                    } else {
-                        res = await (this.api as any)[
-                            handlers[this.tab] || "getFirst"
-                        ](this.promt, this.textOpts);
+        methods: {
+            showSettings() {
+                this.settings = !this.settings;
+            },
+            changeMaxTokens() {
+                console.log("MAX", this.textOpts);
+            },
+            async run() {
+                if (!this.isLoading) {
+                    this.isLoading = true;
+                    const handlers = {
+                        code: "getCodeFirst",
+                        image: "getImage",
+                    } as { [key: string]: string };
+                    try {
+                        let res: any = null;
+                        if (this.tab === "image") {
+                            res = await (this.api as any)[
+                                handlers[this.tab] || "getImage"
+                            ](this.promt, this.imageOpts);
+                        } else {
+                            res = await (this.api as any)[
+                                handlers[this.tab] || "getFirst"
+                            ](this.promt, this.textOpts);
+                        }
+                        this.result = res || "";
+                    } catch (e) {
+                        console.error("App error: " + e);
+                    } finally {
+                        this.isLoading = false;
                     }
-                    this.result = res || "";
-                } catch (e) {
-                    console.error("App error: " + e);
-                } finally {
-                    this.isLoading = false;
                 }
-            }
+            },
         },
-    },
-});
+    });
 </script>
 
 <style lang="scss" scoped>

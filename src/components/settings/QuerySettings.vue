@@ -14,7 +14,7 @@
                         ...value,
                         max_tokens: +$event.target?.value,
                     }),
-                        show()
+                    show()
                 "
             />
             <input
@@ -51,31 +51,31 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
-import { CreateCompletionRequest } from "openai";
+    import { defineComponent, PropType, ref } from "vue";
+    import { CreateCompletionRequest } from "openai";
 
-export default defineComponent({
-    props: {
-        value: Object as PropType<Partial<CreateCompletionRequest>>,
-        changeMaxTokens: Function,
-    },
-    components: {},
-    data() {
-        return {};
-    },
-    computed: {
+    export default defineComponent({
+        props: {
+            value: Object as PropType<Partial<CreateCompletionRequest>>,
+            changeMaxTokens: Function,
+        },
+        components: {},
+        data() {
+            return {};
+        },
+        computed: {
         // getOptsNames() {
         //    return Object.keys(this.value);
         // },
-    },
-    methods: {
-        show() {
-            console.log(this.value);
-            // if (this.changeMaxTokens) this.changeMaxTokens();
         },
-    },
+        methods: {
+            show() {
+                console.log(this.value);
+            // if (this.changeMaxTokens) this.changeMaxTokens();
+            },
+        },
     // mounted() {},
-});
+    });
 </script>
 
 <style lang="scss" scoped>
