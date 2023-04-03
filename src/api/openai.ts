@@ -5,6 +5,7 @@ import {
     CreateCompletionResponse,
     CreateImageRequestSizeEnum,
 } from "openai";
+import { transcribeAudioFile } from "openai-whisper";
 
 export default class SimpleGPT {
     protected _key: string;
@@ -16,6 +17,14 @@ export default class SimpleGPT {
         this._configuration = null;
         this._openai = null;
         this.setApiKey(key);
+    }
+
+    async getTextFromAudio(file: string, opts?: any): Promise<null | string> {
+        if (!transcribeAudioFile) return null;
+        const response = await transcribeAudioFile(file)({
+            model: opts?.model || "whisper-1",
+        });
+        return response.data;
     }
 
     async get(
