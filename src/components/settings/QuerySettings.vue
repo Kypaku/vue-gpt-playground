@@ -2,48 +2,47 @@
     <div class="query-settings">
         <h3>Query-settings</h3>
         <div class="settingsWrapper">
-            <input
-                type="number"
+            <InputNumber
                 name="max_tokens"
                 min="50"
                 max="1000"
-                placeholder="200"
                 :value="value?.max_tokens"
-                @input="
-                    $emit('update:value', {
-                        ...value,
-                        max_tokens: +$event.target?.value,
-                    }),
-                    show()
+                label="max_tokens"
+                @update:value="
+                    (newVal) =>
+                        $emit('update:value', {
+                            ...value,
+                            ['max_tokens']: newVal,
+                        })
                 "
             />
-            <input
-                type="number"
+            <InputNumber
                 name="temperature"
                 min="0"
-                max="2"
+                max="1"
                 step="0.1"
-                placeholder="select temperature"
                 :value="value?.temperature"
-                @input="
-                    $emit('update:value', {
-                        ...value,
-                        temperature: +$event.target?.value,
-                    })
+                label="temperature"
+                @update:value="
+                    (newVal) =>
+                        $emit('update:value', {
+                            ...value,
+                            ['temperature']: newVal,
+                        })
                 "
             />
-            <input
-                type="number"
+            <InputNumber
                 name="n"
                 min="0"
                 max="5"
-                placeholder="select number of completions"
                 :value="value?.n"
-                @input="
-                    $emit('update:value', {
-                        ...value,
-                        n: +$event.target?.value,
-                    })
+                label="number of"
+                @update:value="
+                    (newVal) =>
+                        $emit('update:value', {
+                            ...value,
+                            ['n']: newVal,
+                        })
                 "
             />
         </div>
@@ -51,31 +50,28 @@
 </template>
 
 <script lang="ts">
-    import { defineComponent, PropType, ref } from "vue";
-    import { CreateCompletionRequest } from "openai";
+import { defineComponent, PropType } from "vue";
+import { CreateCompletionRequest } from "openai";
+import InputNumber from "./InputNumber.vue";
 
-    export default defineComponent({
-        props: {
-            value: Object as PropType<Partial<CreateCompletionRequest>>,
-            changeMaxTokens: Function,
+export default defineComponent({
+    props: {
+        value: Object as PropType<Partial<CreateCompletionRequest>>,
+    },
+    components: {
+        InputNumber,
+    },
+    data() {
+        return {};
+    },
+    computed: {},
+    methods: {
+        show() {
+            console.log(this.value?.max_tokens);
         },
-        components: {},
-        data() {
-            return {};
-        },
-        computed: {
-        // getOptsNames() {
-        //    return Object.keys(this.value);
-        // },
-        },
-        methods: {
-            show() {
-                console.log(this.value);
-            // if (this.changeMaxTokens) this.changeMaxTokens();
-            },
-        },
+    },
     // mounted() {},
-    });
+});
 </script>
 
 <style lang="scss" scoped>

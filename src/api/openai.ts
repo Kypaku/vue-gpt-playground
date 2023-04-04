@@ -5,7 +5,6 @@ import {
     CreateCompletionResponse,
     CreateImageRequestSizeEnum,
 } from "openai";
-import { transcribeAudioFile } from "openai-whisper";
 
 export default class SimpleGPT {
     protected _key: string;
@@ -19,12 +18,23 @@ export default class SimpleGPT {
         this.setApiKey(key);
     }
 
-    async getTextFromAudio(file: string, opts?: any): Promise<null | string> {
-        if (!transcribeAudioFile) return null;
-        const response = await transcribeAudioFile(file)({
-            model: opts?.model || "whisper-1",
-        });
-        return response.data;
+    async transcribe(
+        file: File,
+        opts?: Partial<{
+            model: string;
+            prompt: string;
+            temperature: number;
+            response_format: string;
+        }>
+    ): Promise<string | undefined> {
+        const response = await this._openai?.createTranscription(
+            file,
+            opts?.model || "whisper-1",
+            opts?.prompt,
+            opts?.response_format,
+            opts?.temperature
+        );
+        return response?.data.text;
     }
 
     async get(
