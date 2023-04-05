@@ -1,6 +1,6 @@
 <template>
     <div class="query-settings">
-        <h3>Query-settings</h3>
+        <h3>Text-query-settings</h3>
         <div class="settingsWrapper">
             <InputNumber
                 name="max_tokens"

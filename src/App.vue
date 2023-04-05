@@ -27,8 +27,17 @@
                 <span v-else style="color: red">Close settings &#215;</span>
             </button>
 
-            <QuerySettings v-if="settings" v-model:value="textOpts">
-            </QuerySettings>
+            <TextQuerySettings
+                v-if="settings && tab === ''"
+                v-model:value="textOpts"
+            >
+            </TextQuerySettings>
+
+            <ImageQuerySettings
+                v-if="settings && tab === 'image'"
+                v-model:value="imageOpts.n"
+            >
+            </ImageQuerySettings>
 
             <Tabs v-model:value="tab" :tabs="tabs" class="mt-8" />
             <div class="description mt-4">
@@ -65,13 +74,15 @@ import { defineComponent } from "@vue/runtime-core";
 import InputText from "./components/misc/InputText.vue";
 import InputTextarea from "./components/misc/InputTextarea.vue";
 import Tabs, { ITab } from "./components/misc/Tabs.vue";
-import QuerySettings from "./components/settings/QuerySettings.vue";
+import TextQuerySettings from "./components/settings/TextQuerySettings.vue";
+import ImageQuerySettings from "./components/settings/ImageQuerySettings.vue";
 export default defineComponent({
     components: {
         Tabs,
         InputTextarea,
         InputText,
-        QuerySettings,
+        TextQuerySettings,
+        ImageQuerySettings,
     },
     data() {
         return {
@@ -88,7 +99,6 @@ export default defineComponent({
             },
             imageOpts: {
                 n: 1,
-                size: 512,
             },
             tab: "",
             tabs: [
@@ -120,14 +130,14 @@ export default defineComponent({
                 this.isLoading = true;
                 const handlers = {
                     code: "getCodeFirst",
-                    image: "getImage",
+                    image: "getImages",
                 } as { [key: string]: string };
                 try {
                     let res: any = null;
                     if (this.tab === "image") {
                         res = await (this.api as any)[
-                            handlers[this.tab] || "getImage"
-                        ](this.promt, this.imageOpts);
+                            handlers[this.tab] || "getImages"
+                        ](this.promt, this.imageOpts.n);
                     } else {
                         res = await (this.api as any)[
                             handlers[this.tab] || "get"
