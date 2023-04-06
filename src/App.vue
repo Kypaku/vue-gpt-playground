@@ -38,7 +38,11 @@
                 v-model:value="imageOpts.n"
             >
             </ImageQuerySettings>
-            <button @click="runTranscribe()">SHOW TRANSCRIBE</button>
+
+            <input
+                type="file"
+                @change="(event) => runTranscribe(event?.target?.value)"
+            />
 
             <Tabs v-model:value="tab" :tabs="tabs" class="mt-8" />
             <div class="description mt-4">
@@ -110,6 +114,7 @@ export default defineComponent({
             ] as ITab[],
             result: "",
             isLoading: false,
+            waitResponse: true,
             promt: "",
             apiKey: process.env.OPENAI_API_KEY || "",
             api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
@@ -127,14 +132,14 @@ export default defineComponent({
         showSettings() {
             this.settings = !this.settings;
         },
-        async runTranscribe() {
+        async runTranscribe(val: any) {
+            console.log(val);
             if (!this.isLoading) {
                 this.isLoading = true;
-                const fileName =
-                    "./components/audio/examples_audio_example.mp3";
-                const fileBuffer = fs.readFileSync(fileName);
+
+                const fileBuffer = fs.readFileSync(val);
                 const blob = new Blob([fileBuffer], { type: "audio/mp3" });
-                const file = new File([blob], fileName, { type: blob.type });
+                const file = new File([blob], val, { type: blob.type });
                 try {
                     let res: any = null;
                     res = await (this.api as any).transcribe(file);
