@@ -34,6 +34,7 @@ export default class SimpleGPT {
             opts?.response_format,
             opts?.temperature
         );
+        console.log(response);
         return response?.data.text;
     }
 

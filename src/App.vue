@@ -38,6 +38,7 @@
                 v-model:value="imageOpts.n"
             >
             </ImageQuerySettings>
+            <button @click="runTranscribe()">SHOW TRANSCRIBE</button>
 
             <Tabs v-model:value="tab" :tabs="tabs" class="mt-8" />
             <div class="description mt-4">
@@ -70,6 +71,7 @@
 
 <script lang="ts">
 import SimpleGPT from "./api/openai";
+import * as fs from "fs";
 import { defineComponent } from "@vue/runtime-core";
 import InputText from "./components/misc/InputText.vue";
 import InputTextarea from "./components/misc/InputTextarea.vue";
@@ -124,6 +126,26 @@ export default defineComponent({
     methods: {
         showSettings() {
             this.settings = !this.settings;
+        },
+        async runTranscribe() {
+            if (!this.isLoading) {
+                this.isLoading = true;
+                const fileName =
+                    "./components/audio/examples_audio_example.mp3";
+                const fileBuffer = fs.readFileSync(fileName);
+                const blob = new Blob([fileBuffer], { type: "audio/mp3" });
+                const file = new File([blob], fileName, { type: blob.type });
+                try {
+                    let res: any = null;
+                    res = await (this.api as any).transcribe(file);
+
+                    this.result = res || "";
+                } catch (e) {
+                    console.error("App error: " + e);
+                } finally {
+                    this.isLoading = false;
+                }
+            }
         },
         async run() {
             if (!this.isLoading) {
