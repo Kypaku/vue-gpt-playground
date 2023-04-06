@@ -6,6 +6,12 @@ import {
     CreateImageRequestSizeEnum,
 } from "openai";
 
+class CustomFormData extends FormData {
+    getHeaders() {
+        return {};
+    }
+}
+
 export default class SimpleGPT {
     protected _key: string;
     protected _configuration: Configuration | null;
@@ -124,6 +130,7 @@ export default class SimpleGPT {
         }
         this._configuration = new Configuration({
             apiKey: this._key,
+            formDataCtor: CustomFormData,
         });
         this._openai = new OpenAIApi(this._configuration);
     }

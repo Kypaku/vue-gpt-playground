@@ -137,12 +137,13 @@ export default defineComponent({
             if (!this.isLoading) {
                 this.isLoading = true;
 
-                const fileBuffer = fs.readFileSync(val);
-                const blob = new Blob([fileBuffer], { type: "audio/mp3" });
-                const file = new File([blob], val, { type: blob.type });
+                // const fileBuffer = fs.readFileSync(val);
+                // const blob = new Blob([fileBuffer], { type: "audio/mp3" });
+                // const file = new File([blob], val, { type: blob.type });
+                const audioObj = new Audio(val);
                 try {
                     let res: any = null;
-                    res = await (this.api as any).transcribe(file);
+                    res = await (this.api as any).transcribe(audioObj);
 
                     this.result = res || "";
                 } catch (e) {
