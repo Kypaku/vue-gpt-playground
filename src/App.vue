@@ -39,6 +39,8 @@
             >
             </ImageQuerySettings>
 
+            <SpeechRecording></SpeechRecording>
+
             <input
                 type="file"
                 @change="(event) => runTranscribe(event?.target?.value)"
@@ -82,6 +84,7 @@ import InputTextarea from "./components/misc/InputTextarea.vue";
 import Tabs, { ITab } from "./components/misc/Tabs.vue";
 import TextQuerySettings from "./components/settings/TextQuerySettings.vue";
 import ImageQuerySettings from "./components/settings/ImageQuerySettings.vue";
+import SpeechRecording from "./components/audio/SpeechRecording.vue";
 export default defineComponent({
     components: {
         Tabs,
@@ -89,6 +92,7 @@ export default defineComponent({
         InputText,
         TextQuerySettings,
         ImageQuerySettings,
+        SpeechRecording,
     },
     data() {
         return {
