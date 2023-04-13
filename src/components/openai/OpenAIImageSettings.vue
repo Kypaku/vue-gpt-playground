@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import InputNumber from "./InputNumber.vue";
+import InputNumber from "../misc/InputNumber.vue";
 
 export default defineComponent({
     props: {

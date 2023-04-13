@@ -52,7 +52,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { CreateCompletionRequest } from "openai";
-import InputNumber from "./InputNumber.vue";
+import InputNumber from "../misc/InputNumber.vue";
 
 export default defineComponent({
     props: {
