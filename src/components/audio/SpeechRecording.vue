@@ -24,8 +24,7 @@ export default defineComponent({
         record() {
             this.mediaRecorder.start();
             this.mediaRecorder.onstop = this.onStop;
-            this.mediaRecorder.ondataAvailable = this.ondataAvailable;
-            console.log(this.mediaRecorder);
+            this.mediaRecorder.ondataavailable = this.ondataAvailable;
         },
         stop() {
             console.log(this.mediaRecorder);
@@ -64,46 +63,15 @@ export default defineComponent({
         },
         ondataAvailable(e: any) {
             this.chunks.push(e.data);
-            console.log(this.chunks);
         },
     },
     mounted() {
         if (navigator.mediaDevices.getUserMedia) {
             this.constraints = { audio: true };
-            // let chunks = [] as any;
             const onSuccess = (stream: any) => {
+                console.log("STREAM", stream);
                 this.mediaRecorder = new (window as any).MediaRecorder(stream);
                 console.log(this.mediaRecorder);
-                // mediaRecorder.start();
-                // setTimeout(() => {
-                //    mediaRecorder.stop();
-                // }, 5000);
-                // mediaRecorder.onstop = function (e: any) {
-                //    const blob = new Blob(chunks, { type: "audio/webm" });
-                //    chunks = [];
-                //    var token = localStorage.getItem("OPENAI_API_KEY");
-                //    if (!token || token.length < 10) {
-                //        token = prompt("Please input OpenAI API key (stored in browser cache)", "");
-                //        localStorage.setItem("OPENAI_API_KEY", token || "");
-                //    }
-                //    const formData = new FormData();
-                //    formData.append("file", blob, "test.webm");
-                //    formData.append("model", "whisper-1");
-                //    const requestOptions = {
-                //        method: "POST",
-                //        headers: {
-                //            Authorization: `Bearer ${token}`
-                //        },
-                //        body: formData
-                //    };
-                //    fetch("https://api.openai.com/v1/audio/transcriptions", requestOptions)
-                //        .then(response => response.json())
-                //        .then(data => {
-                //            console.log(data);
-                //        })
-                //        .catch(error => console.log("Error:", error));
-                // };
-                // mediaRecorder.ondataavailable = function (e: any) { chunks.push(e.data); };
             };
             const onError = (err: any) => {
                 console.log("The following error occured: " + err);
