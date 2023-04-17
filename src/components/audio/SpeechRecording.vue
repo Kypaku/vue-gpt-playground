@@ -10,13 +10,17 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-    // props: {},
+    props: {
+        setResult: Function,
+        run: Function,
+    },
     components: {},
     data() {
         return {
             constraints: { audio: false },
             mediaRecorder: null as any, // new (window as any).MediaRecorder(null),
             chunks: [] as any,
+            recordedResult: "",
         };
     },
     computed: {},
@@ -58,6 +62,10 @@ export default defineComponent({
                 .then((response) => response.json())
                 .then((data) => {
                     console.log(data);
+                    if (this.setResult) this.setResult(data.text);
+                })
+                .then(() => {
+                    if (this.run) this.run();
                 })
                 .catch((error) => console.log("Error:", error));
         },
