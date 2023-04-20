@@ -8,12 +8,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import SimpleGPT from "./../../api/openai";
 
 export default defineComponent({
-    props: {
-        setPromt: Function,
-        run: Function,
-    },
+    // props: {
+    // },
     components: {},
     data() {
         return {
@@ -21,6 +20,8 @@ export default defineComponent({
             mediaRecorder: null as any, // new (window as any).MediaRecorder(null),
             chunks: [] as any,
             recordedResult: "",
+            apiKey: process.env.OPENAI_API_KEY || "",
+            api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
         };
     },
     computed: {},
@@ -34,7 +35,7 @@ export default defineComponent({
             console.log(this.mediaRecorder);
             this.mediaRecorder.stop();
         },
-        onStop() {
+        async onStop() {
             const blob = new Blob(this.chunks, { type: "audio/webm" });
             this.chunks = [];
             let token = localStorage.getItem("key");
@@ -55,24 +56,12 @@ export default defineComponent({
                 },
                 body: formData,
             };
-            this.transcribeVoice(requestOptions);
+            const text = await this.api.transcribeVoice(requestOptions);
+            this.$emit("setPromt", text);
+            this.$emit("run");
         },
         ondataAvailable(e: any) {
             this.chunks.push(e.data);
-        },
-        async transcribeVoice(options: any) {
-            try {
-                const response = await fetch(
-                    "https://api.openai.com/v1/audio/transcriptions",
-                    options
-                );
-                const json = await response.json();
-                console.log(json);
-                this.$emit("setPromt", json.text);
-                this.$emit("run");
-            } catch (err) {
-                console.log(err);
-            }
         },
     },
     mounted() {

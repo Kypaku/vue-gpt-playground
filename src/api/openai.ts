@@ -24,6 +24,20 @@ export default class SimpleGPT {
         this.setApiKey(key);
     }
 
+    async transcribeVoice(options: any) {
+        try {
+            const response = await fetch(
+                "https://api.openai.com/v1/audio/transcriptions",
+                options
+            );
+            const json = await response.json();
+            console.log(json);
+            return json.text;
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     async transcribe(
         file: File,
         opts?: Partial<{
