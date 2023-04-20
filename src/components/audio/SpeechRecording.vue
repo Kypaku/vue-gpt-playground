@@ -11,7 +11,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
     props: {
-        setResult: Function,
+        setPromt: Function,
         run: Function,
     },
     components: {},
@@ -55,22 +55,24 @@ export default defineComponent({
                 },
                 body: formData,
             };
-            fetch(
-                "https://api.openai.com/v1/audio/transcriptions",
-                requestOptions
-            )
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log(data);
-                    if (this.setResult) this.setResult(data.text);
-                })
-                .then(() => {
-                    if (this.run) this.run();
-                })
-                .catch((error) => console.log("Error:", error));
+            this.transcribeVoice(requestOptions);
         },
         ondataAvailable(e: any) {
             this.chunks.push(e.data);
+        },
+        async transcribeVoice(options: any) {
+            try {
+                const response = await fetch(
+                    "https://api.openai.com/v1/audio/transcriptions",
+                    options
+                );
+                const json = await response.json();
+                console.log(json);
+                this.$emit("setPromt", json.text);
+                this.$emit("run");
+            } catch (err) {
+                console.log(err);
+            }
         },
     },
     mounted() {

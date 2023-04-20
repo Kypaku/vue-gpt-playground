@@ -39,10 +39,7 @@
             >
             </ImageQuerySettings>
 
-            <SpeechRecording
-                :setResult="setResult"
-                :run="run"
-            ></SpeechRecording>
+            <SpeechRecording @setPromt="setPromt" @run="run"></SpeechRecording>
 
             <input
                 type="file"
@@ -115,7 +112,7 @@ export default defineComponent({
             },
             tab: "",
             tabs: [
-                { label: "Voice command", value: "voice-command" },
+                // { label: "Voice command", value: "voice-command" },
                 { label: "Text", value: "" },
                 { label: "Code", value: "code" },
                 { label: "Image", value: "image" },
@@ -137,8 +134,8 @@ export default defineComponent({
         },
     },
     methods: {
-        setResult(data: string): void {
-            this.result = data;
+        setPromt(data: string): void {
+            this.promt = data;
         },
         showSettings() {
             this.settings = !this.settings;
@@ -173,11 +170,12 @@ export default defineComponent({
                 } as { [key: string]: string };
                 try {
                     let res: any = null;
-                    if (this.tab === "voice-command") {
-                        res = await (this.api as any)[
-                            handlers[this.tab] || "get"
-                        ](this.result, this.textOpts);
-                    } else if (this.tab === "image") {
+                    // if (this.tab === "voice-command") {
+                    //    res = await (this.api as any)[
+                    //        handlers[this.tab] || "get"
+                    //    ](this.result, this.textOpts);
+                    // } else
+                    if (this.tab === "image") {
                         res = await (this.api as any)[
                             handlers[this.tab] || "getImages"
                         ](this.promt, this.imageOpts.n);
