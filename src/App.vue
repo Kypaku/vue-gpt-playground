@@ -41,10 +41,7 @@
 
             <SpeechRecording @setPromt="setPromt" @run="run"></SpeechRecording>
 
-            <input
-                type="file"
-                @change="(event) => runTranscribe(event?.target?.value)"
-            />
+            <input type="file" @change="(event) => runTranscribe(event)" />
 
             <Tabs v-model:value="tab" :tabs="tabs" class="mt-8" />
             <div class="description mt-4">
@@ -141,19 +138,26 @@ export default defineComponent({
             this.settings = !this.settings;
         },
         async runTranscribe(val: any) {
-            console.log(val);
             if (!this.isLoading) {
                 this.isLoading = true;
-
-                // const fileBuffer = fs.readFileSync(val);
-                // const blob = new Blob([fileBuffer], { type: "audio/mp3" });
-                // const file = new File([blob], val, { type: blob.type });
-                const audioObj = new Audio(val);
                 try {
-                    let res: any = null;
-                    res = await (this.api as any).transcribe(audioObj);
-
-                    this.result = res || "";
+                    const blob = new Blob([val.target.files[0]], {
+                        type: "audio/webm",
+                    });
+                    const formData = new FormData();
+                    formData.append("file", blob, "test.webm");
+                    formData.append("model", "whisper-1");
+                    const token = localStorage.getItem("key");
+                    const requestOptions = {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: formData,
+                    };
+                    const text = await this.api.transcribe(requestOptions);
+                    console.log(text);
+                    this.result = text || "";
                 } catch (e) {
                     console.error("App error: " + e);
                 } finally {

@@ -56,12 +56,13 @@ export default defineComponent({
                 },
                 body: formData,
             };
-            const text = await this.api.transcribeVoice(requestOptions);
+            const text = await this.api.transcribe(requestOptions);
             this.$emit("setPromt", text);
             this.$emit("run");
         },
         ondataAvailable(e: any) {
             this.chunks.push(e.data);
+            console.log("CHUNKS", this.chunks);
         },
     },
     mounted() {
