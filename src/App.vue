@@ -54,11 +54,9 @@
             </div>
 
             <SpeechRecording
-                v-if="tab !== 'audio' && !isLoading"
+                v-if="tab !== 'audio'"
                 @setPromt="setPromt"
-                @setLoading="setLoading"
             ></SpeechRecording>
-            <div v-if="tab !== 'audio' && isLoading">Loading...</div>
 
             <InputTextarea
                 v-if="tab !== 'audio'"
@@ -150,9 +148,6 @@ export default defineComponent({
     methods: {
         setPromt(data: string): void {
             this.promt = data;
-        },
-        setLoading(): void {
-            this.isLoading = !this.isLoading;
         },
         showSettings() {
             this.settings = !this.settings;

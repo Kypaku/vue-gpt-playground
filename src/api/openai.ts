@@ -31,7 +31,6 @@ export default class SimpleGPT {
                 options
             );
             const json = await response.json();
-            console.log(json);
             return json.text;
         } catch (err) {
             console.log(err);

@@ -2,7 +2,7 @@
     <div class="speech-recording">
         <button class="record" @click="record()">Record</button>
         <button class="stop" @click="stop()">Stop</button>
-        <div id="output"></div>
+        <div v-if="isLoading">Loading...</div>
     </div>
 </template>
 
@@ -22,11 +22,15 @@ export default defineComponent({
             recordedResult: "",
             apiKey: process.env.OPENAI_API_KEY || "",
             api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
+            isLoading: false,
         };
     },
     computed: {},
     methods: {
         record() {
+            if (!this.mediaRecorder) {
+                alert("You have a problem with your device");
+            }
             this.mediaRecorder.start();
             this.mediaRecorder.onstop = this.onStop;
             this.mediaRecorder.ondataavailable = this.ondataAvailable;
@@ -34,7 +38,7 @@ export default defineComponent({
         stop() {
             console.log(this.mediaRecorder);
             this.mediaRecorder.stop();
-            // this.$emit("setLoading");
+            this.isLoading = true;
         },
         async onStop() {
             const blob = new Blob(this.chunks, { type: "audio/webm" });
@@ -59,7 +63,7 @@ export default defineComponent({
             };
             const text = await this.api.transcribe(requestOptions);
             this.$emit("setPromt", text);
-            // this.$emit("setLoading");
+            this.isLoading = false;
         },
         ondataAvailable(e: any) {
             this.chunks.push(e.data);
