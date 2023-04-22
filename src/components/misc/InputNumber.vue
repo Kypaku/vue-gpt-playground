@@ -3,6 +3,7 @@
         <label class="mr-2">{{ label }}</label>
         <input
             v-bind="$attrs"
+            class="border-2 px-2 py-1 rounded" 
             type="number"
             placeholder="enter value"
             :value="value"
@@ -12,21 +13,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+    import { defineComponent } from "vue";
 
-export default defineComponent({
-    props: {
-        value: Number,
-        label: String,
-    },
-    components: {},
-    data() {
-        return {};
-    },
-    computed: {},
-    methods: {},
+    export default defineComponent({
+        props: {
+            value: Number,
+            label: String,
+        },
+        components: {},
+        data() {
+            return {};
+        },
+        computed: {},
+        methods: {},
     // mounted() {},
-});
+    });
 </script>
 
 <style lang="scss" scoped></style>

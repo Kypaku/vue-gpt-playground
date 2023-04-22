@@ -3,7 +3,7 @@
         <label :for="id" class="mr-2">{{ label }}</label>
         <input
             type="text"
-            class="border-2"
+            class="border-2 px-2 py-1 rounded"
             ref="input"
             :id="id"
             :value="value"

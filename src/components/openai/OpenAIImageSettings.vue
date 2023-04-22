@@ -1,7 +1,7 @@
 <template>
     <div class="query-settings">
-        <h3>Image-query-settings</h3>
-        <div class="settingsWrapper">
+        <b>DALL-E settings</b>
+        <div class="settingsWrapper flex-col">
             <InputNumber
                 name="n"
                 min="0"
