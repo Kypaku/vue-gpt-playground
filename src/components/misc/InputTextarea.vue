@@ -1,7 +1,7 @@
 <template>
     <div class="input-text">
         <div>
-            <label :for="id" class="mr-2">{{label}}</label>
+            <label :for="id" class="mr-2">{{ label }}</label>
         </div>
         <textarea
             type="text"
@@ -9,81 +9,47 @@
             ref="input"
             :id="id"
             :value="value"
-            v-bind="{...$attrs, class: 'w-full'}"
+            v-bind="{ ...$attrs, class: 'w-full' }"
             :placeholder="placeholder"
             :disabled="disabled"
-            @keydown.tab.exact.prevent="suggestions && suggest(suggestionsFiltered[0])"
             @keypress.enter="$emit('end')"
-            @input="ev => $emit('update:value', ev.target?.value)"/>
-        <div class="suggestions suggestions-action cursor-pointer flex flex-wrap justify-center mt-1">
-            <div class="dummy">Dummy</div>
-            <div
-                class="suggestion mr-2 text-sm"
-                v-for="(item, i) in suggestionsFiltered.slice(0, 7)"
-                :class="{first: !i}"
-                :key="i"
-                @click="$emit('update:value', item.value)">
-                {{item.name}}
-            </div>
-        </div>
+            @input="(ev) => $emit('update:value', ev.target?.value)"
+        />
     </div>
 </template>
 
-<script lang='ts'>
-    import { localeIncludes, localeStart } from '@/helpers'
-    import { defineComponent, PropType } from 'vue'
+<script lang="ts">
+import { defineComponent } from "vue";
 
-    export interface InputTextSuggestion {
-        name: string
-        value: string
-    }
+export interface InputTextSuggestion {
+    name: string;
+    value: string;
+}
 
-    export default defineComponent({
-        props: {
-            placeholder: String,
-            label: String,
-            value: String,
-            suggestions: Object as PropType<InputTextSuggestion[]>,
-            disabled: Boolean,
-        },
-        components: {
+export default defineComponent({
+    props: {
+        placeholder: String,
+        label: String,
+        value: String,
+        disabled: Boolean,
+    },
+    components: {},
+    data() {
+        return {
+            id: "input-text" + +new Date(),
+        };
+    },
+    computed: {},
+    methods: {},
 
-        },
-        data() {
-            return {
-                id: 'input-text' + +new Date()
-            }
-        },
-        computed: {
-            suggestionsFiltered() {
-                if (!this.suggestions) return []
-                const byStart = this.suggestions.filter((el) => this.value ? localeStart(el.name, this.value) : true)
-                const byInclude = this.suggestions.filter((el) => this.value ? localeIncludes(el.name, this.value) : true)
-                return [...byStart, ...byInclude]
-            },
-        },
-        methods: {
-            suggest(suggestion: InputTextSuggestion) {
-                this.$emit('update:value', suggestion.value)
-                this.$emit('suggest', suggestion)
-            },
-        },
-
-        mounted () {
-            this.$emit('mounted', this.$refs.input)
-        },
-    })
-
-    </script>
+    mounted() {
+        this.$emit("mounted", this.$refs.input);
+    },
+});
+</script>
 
 <style lang="scss" scoped>
-    .first{
-        font-weight: 700;
-    }
-    .suggestion{
-
-    }
-    .dummy{
-        opacity: 0;
-    }
+.first {
+    font-weight: 700;
+}
 </style>
