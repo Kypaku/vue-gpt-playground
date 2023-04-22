@@ -34,6 +34,7 @@ export default defineComponent({
         stop() {
             console.log(this.mediaRecorder);
             this.mediaRecorder.stop();
+            // this.$emit("setLoading");
         },
         async onStop() {
             const blob = new Blob(this.chunks, { type: "audio/webm" });
@@ -58,20 +59,17 @@ export default defineComponent({
             };
             const text = await this.api.transcribe(requestOptions);
             this.$emit("setPromt", text);
-            this.$emit("run");
+            // this.$emit("setLoading");
         },
         ondataAvailable(e: any) {
             this.chunks.push(e.data);
-            console.log("CHUNKS", this.chunks);
         },
     },
     mounted() {
         if (navigator.mediaDevices.getUserMedia) {
             this.constraints = { audio: true };
             const onSuccess = (stream: any) => {
-                console.log("STREAM", stream);
                 this.mediaRecorder = new (window as any).MediaRecorder(stream);
-                console.log(this.mediaRecorder);
             };
             const onError = (err: any) => {
                 console.log("The following error occured: " + err);

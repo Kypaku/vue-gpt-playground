@@ -39,21 +39,39 @@
             >
             </ImageQuerySettings>
 
-            <SpeechRecording @setPromt="setPromt" @run="run"></SpeechRecording>
-
-            <input type="file" @change="(event) => runTranscribe(event)" />
-
             <Tabs v-model:value="tab" :tabs="tabs" class="mt-8" />
             <div class="description mt-4">
                 <a target="_blank" :href="currentGuide">API Guide</a>
             </div>
+
+            <div>
+                <input
+                    v-if="tab === 'audio' && !isLoading"
+                    type="file"
+                    @change="(event) => runTranscribe(event)"
+                />
+                {{ isLoading ? "Loading..." : "" }}
+            </div>
+
+            <SpeechRecording
+                v-if="tab !== 'audio' && !isLoading"
+                @setPromt="setPromt"
+                @setLoading="setLoading"
+            ></SpeechRecording>
+            <div v-if="tab !== 'audio' && isLoading">Loading...</div>
+
             <InputTextarea
+                v-if="tab !== 'audio'"
                 v-model:value="promt"
                 :label="'Promt:'"
                 class="w-1/2 mt-8"
                 :rows="10"
             />
-            <button @click="run" class="mt-2 bg-gray-300 px-2 py-1">
+            <button
+                v-if="tab !== 'audio'"
+                @click="run"
+                class="mt-2 bg-gray-300 px-2 py-1"
+            >
                 {{ isLoading ? "Loading..." : "Run" }}
             </button>
             <div class="image-wrapper" v-if="tab === 'image'">
@@ -74,7 +92,6 @@
 
 <script lang="ts">
 import SimpleGPT from "./api/openai";
-import * as fs from "fs";
 import { defineComponent } from "@vue/runtime-core";
 import InputText from "./components/misc/InputText.vue";
 import InputTextarea from "./components/misc/InputTextarea.vue";
@@ -109,10 +126,10 @@ export default defineComponent({
             },
             tab: "",
             tabs: [
-                // { label: "Voice command", value: "voice-command" },
                 { label: "Text", value: "" },
                 { label: "Code", value: "code" },
                 { label: "Image", value: "image" },
+                { label: "Audio", value: "audio" },
             ] as ITab[],
             result: "",
             isLoading: false,
@@ -133,6 +150,9 @@ export default defineComponent({
     methods: {
         setPromt(data: string): void {
             this.promt = data;
+        },
+        setLoading(): void {
+            this.isLoading = !this.isLoading;
         },
         showSettings() {
             this.settings = !this.settings;
@@ -156,7 +176,6 @@ export default defineComponent({
                         body: formData,
                     };
                     const text = await this.api.transcribe(requestOptions);
-                    console.log(text);
                     this.result = text || "";
                 } catch (e) {
                     console.error("App error: " + e);
@@ -174,11 +193,6 @@ export default defineComponent({
                 } as { [key: string]: string };
                 try {
                     let res: any = null;
-                    // if (this.tab === "voice-command") {
-                    //    res = await (this.api as any)[
-                    //        handlers[this.tab] || "get"
-                    //    ](this.result, this.textOpts);
-                    // } else
                     if (this.tab === "image") {
                         res = await (this.api as any)[
                             handlers[this.tab] || "getImages"
