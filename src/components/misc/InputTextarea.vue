@@ -3,6 +3,8 @@
         <div>
             <label :for="id" class="mr-2">{{ label }}</label>
         </div>
+        <!--<SpeechRecording v-if="tab !== 'audio' && !isLoading"></SpeechRecording>
+        <div v-if="tab !== 'audio' && isLoading">Loading...</div>-->
         <textarea
             type="text"
             class="border-2"
@@ -20,11 +22,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
-export interface InputTextSuggestion {
-    name: string;
-    value: string;
-}
+import SpeechRecording from "../audio/SpeechRecording.vue";
 
 export default defineComponent({
     props: {
@@ -32,8 +30,12 @@ export default defineComponent({
         label: String,
         value: String,
         disabled: Boolean,
+        tab: String,
+        isLoading: Boolean,
     },
-    components: {},
+    components: {
+        // SpeechRecording,
+    },
     data() {
         return {
             id: "input-text" + +new Date(),

@@ -36,7 +36,7 @@ export default defineComponent({
             this.mediaRecorder.ondataavailable = this.ondataAvailable;
         },
         stop() {
-            console.log(this.mediaRecorder);
+            // console.log(this.mediaRecorder);
             this.mediaRecorder.stop();
             this.isLoading = true;
         },
@@ -62,7 +62,7 @@ export default defineComponent({
                 body: formData,
             };
             const text = await this.api.transcribe(requestOptions);
-            this.$emit("setPromt", text);
+            this.$emit("setPrompt", text);
             this.isLoading = false;
         },
         ondataAvailable(e: any) {

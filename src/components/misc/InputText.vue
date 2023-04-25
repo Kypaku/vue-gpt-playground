@@ -18,11 +18,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-export interface InputTextSuggestion {
-    name: string;
-    value: string;
-}
-
 export default defineComponent({
     props: {
         rows: {
