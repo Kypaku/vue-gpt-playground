@@ -39,16 +39,20 @@
             >
             </OpenAIImageSettings>
 
-            <Tabs v-model:value="tab" :tabs="tabs" class="mt-8" />
+            <Tabs
+                v-model:value="tab"
+                :tabs="tabs"
+                @click="clearResult()"
+                class="mt-8"
+            />
             <div class="description mt-4">
                 <a target="_blank" :href="currentGuide">API Guide</a>
             </div>
 
             <InputFile
-                v-if="tab === 'audio' && !isLoading"
+                v-if="tab === 'audio'"
                 @update:value="(val) => runTranscribe(val)"
                 tab="tab"
-                isTranscribing="isLoading"
             ></InputFile>
 
             <!--<div>
@@ -139,7 +143,7 @@ export default defineComponent({
             tab: "",
             tabs: [
                 { label: "Text", value: "" },
-                { label: "Code", value: "code" },
+                // { label: "Code", value: "code" },
                 { label: "Image", value: "image" },
                 { label: "Audio", value: "audio" },
             ] as ITab[],
@@ -169,31 +173,30 @@ export default defineComponent({
         showSettings() {
             this.settings = !this.settings;
         },
+        clearResult() {
+            this.result = "";
+            this.prompt = "";
+        },
         async runTranscribe(val: any) {
-            if (!this.isLoading) {
-                this.isLoading = true;
-                try {
-                    const blob = new Blob([val.target.files[0]], {
-                        type: "audio/webm",
-                    });
-                    const formData = new FormData();
-                    formData.append("file", blob, "test.webm");
-                    formData.append("model", "whisper-1");
-                    const token = localStorage.getItem("key");
-                    const requestOptions = {
-                        method: "POST",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                        body: formData,
-                    };
-                    const text = await this.api.transcribe(requestOptions);
-                    this.result = text || "";
-                } catch (e) {
-                    console.error("App error: " + e);
-                } finally {
-                    this.isLoading = false;
-                }
+            try {
+                const blob = new Blob([val.target.files[0]], {
+                    type: "audio/webm",
+                });
+                const formData = new FormData();
+                formData.append("file", blob, "test.webm");
+                formData.append("model", "whisper-1");
+                const token = localStorage.getItem("key");
+                const requestOptions = {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: formData,
+                };
+                const text = await this.api.transcribe(requestOptions);
+                this.result = text || "";
+            } catch (e) {
+                console.error("App error: " + e);
             }
         },
         async run() {

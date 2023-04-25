@@ -1,6 +1,6 @@
 <template>
     <div>
-        <input type="file" @change="(event) => $emit('update:value', event)" />
+        <input type="file" @change="(event) => transcribe(event)" />
         {{ isTranscribing ? "Transcribing..." : "" }}
     </div>
 </template>
@@ -11,14 +11,24 @@ import { defineComponent } from "vue";
 export default defineComponent({
     props: {
         tab: String,
-        isTranscribing: Boolean,
     },
     components: {},
     data() {
-        return {};
+        return {
+            isTranscribing: false,
+        };
     },
     computed: {},
-    methods: {},
+    methods: {
+        transcribe(event: any) {
+            this.$emit("update:value", event);
+            this.toggleLoader();
+            setTimeout(this.toggleLoader, 3000);
+        },
+        toggleLoader() {
+            this.isTranscribing = !this.isTranscribing;
+        },
+    },
 });
 </script>
 
