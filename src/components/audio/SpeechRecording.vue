@@ -2,7 +2,7 @@
     <div class="speech-recording">
         <button class="record" @click="record()">Record</button>
         <button class="stop" @click="stop()">Stop</button>
-        <div v-if="isLoading">Loading...</div>
+        <div v-if="isLoading">Transcribing...</div>
     </div>
 </template>
 
@@ -11,13 +11,14 @@ import { defineComponent } from "vue";
 import SimpleGPT from "./../../api/openai";
 
 export default defineComponent({
-    // props: {
-    // },
     components: {},
+    props: {
+        value: String,
+    },
     data() {
         return {
             constraints: { audio: false },
-            mediaRecorder: null as any, // new (window as any).MediaRecorder(null),
+            mediaRecorder: null as any,
             chunks: [] as any,
             recordedResult: "",
             apiKey: process.env.OPENAI_API_KEY || "",
@@ -36,7 +37,6 @@ export default defineComponent({
             this.mediaRecorder.ondataavailable = this.ondataAvailable;
         },
         stop() {
-            // console.log(this.mediaRecorder);
             this.mediaRecorder.stop();
             this.isLoading = true;
         },
@@ -62,8 +62,9 @@ export default defineComponent({
                 body: formData,
             };
             const text = await this.api.transcribe(requestOptions);
-            this.$emit("setPrompt", text);
+            this.$emit("update:value", text);
             this.isLoading = false;
+            console.log(text);
         },
         ondataAvailable(e: any) {
             this.chunks.push(e.data);

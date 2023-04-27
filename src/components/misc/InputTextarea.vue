@@ -3,8 +3,10 @@
         <div>
             <label :for="id" class="mr-2">{{ label }}</label>
         </div>
-        <!--<SpeechRecording v-if="tab !== 'audio' && !isLoading"></SpeechRecording>
-        <div v-if="tab !== 'audio' && isLoading">Loading...</div>-->
+        <SpeechRecording
+            v-if="showSpeechRecording"
+            :value="value"
+        ></SpeechRecording>
         <textarea
             type="text"
             class="border-2"
@@ -30,11 +32,11 @@ export default defineComponent({
         label: String,
         value: String,
         disabled: Boolean,
-        tab: String,
         isLoading: Boolean,
+        showSpeechRecording: Boolean,
     },
     components: {
-        // SpeechRecording,
+        SpeechRecording,
     },
     data() {
         return {

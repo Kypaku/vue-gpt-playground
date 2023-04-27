@@ -52,28 +52,12 @@
             <InputFile
                 v-if="tab === 'audio'"
                 @update:value="(val) => runTranscribe(val)"
-                tab="tab"
             ></InputFile>
-
-            <!--<div>
-                <input
-                    v-if="tab === 'audio' && !isLoading"
-                    type="file"
-                    @change="(event) => runTranscribe(event)"
-                />
-                {{ isLoading ? "Loading..." : "" }}
-            </div>-->
-
-            <SpeechRecording
-                v-if="tab !== 'audio' && !isLoading"
-                @setPrompt="setPrompt"
-                @setLoading="setLoading"
-            ></SpeechRecording>
-            <div v-if="tab !== 'audio' && isLoading">Loading...</div>
+            <div v-if="isTranscribing">Transcribing...</div>
 
             <InputTextarea
                 v-if="tab !== 'audio'"
-                tab="tab"
+                :showSpeechRecording="showSpeechRecording"
                 isLoading
                 v-model:value="prompt"
                 @setPromt="(val) => $emit('update:value', val)"
@@ -112,7 +96,6 @@ import InputTextarea from "./components/misc/InputTextarea.vue";
 import Tabs, { ITab } from "./components/misc/Tabs.vue";
 import OpenAITextSettings from "./components/openai/OpenAITextSettings.vue";
 import OpenAIImageSettings from "./components/openai/OpenAIImageSettings.vue";
-import SpeechRecording from "./components/audio/SpeechRecording.vue";
 import InputFile from "./components/misc/InputFile.vue";
 export default defineComponent({
     components: {
@@ -121,7 +104,6 @@ export default defineComponent({
         InputText,
         OpenAITextSettings,
         OpenAIImageSettings,
-        SpeechRecording,
         InputFile,
     },
     data() {
@@ -141,6 +123,8 @@ export default defineComponent({
                 n: 1,
             },
             tab: "",
+            showSpeechRecording: true,
+            isTranscribing: false,
             tabs: [
                 { label: "Text", value: "" },
                 // { label: "Code", value: "code" },
@@ -151,6 +135,7 @@ export default defineComponent({
             isLoading: false,
             waitResponse: true,
             prompt: "",
+            text: "",
             apiKey: process.env.OPENAI_API_KEY || "",
             api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
         };
@@ -167,9 +152,6 @@ export default defineComponent({
         setPrompt(data: string): void {
             this.prompt = data;
         },
-        setLoading(): void {
-            this.isLoading = !this.isLoading;
-        },
         showSettings() {
             this.settings = !this.settings;
         },
@@ -178,25 +160,30 @@ export default defineComponent({
             this.prompt = "";
         },
         async runTranscribe(val: any) {
-            try {
-                const blob = new Blob([val.target.files[0]], {
-                    type: "audio/webm",
-                });
-                const formData = new FormData();
-                formData.append("file", blob, "test.webm");
-                formData.append("model", "whisper-1");
-                const token = localStorage.getItem("key");
-                const requestOptions = {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: formData,
-                };
-                const text = await this.api.transcribe(requestOptions);
-                this.result = text || "";
-            } catch (e) {
-                console.error("App error: " + e);
+            if (!this.isTranscribing) {
+                this.isTranscribing = true;
+                try {
+                    const blob = new Blob([val.target.files[0]], {
+                        type: "audio/webm",
+                    });
+                    const formData = new FormData();
+                    formData.append("file", blob, "test.webm");
+                    formData.append("model", "whisper-1");
+                    const token = localStorage.getItem("key");
+                    const requestOptions = {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: formData,
+                    };
+                    const text = await this.api.transcribe(requestOptions);
+                    this.result = text || "";
+                } catch (e) {
+                    console.error("App error: " + e);
+                } finally {
+                    this.isTranscribing = false;
+                }
             }
         },
         async run() {
