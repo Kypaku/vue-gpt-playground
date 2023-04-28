@@ -5,7 +5,7 @@
         </div>
         <SpeechRecording
             v-if="showSpeechRecording"
-            :value="value"
+            @update:value="(val) => $emit('update:value', val)"
         ></SpeechRecording>
         <textarea
             type="text"

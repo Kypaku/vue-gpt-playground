@@ -3,41 +3,54 @@
         <div class="text-2xl w-full text-center mt-10">
             <b>Vue.js GPT API Sample:</b>
         </div>
-        <div class="main container mx-auto mt-10">
-            <div class="mt-4">
-                To get an API KEY you need to register new OPEN API account and
-                then visit
-                <a
-                    href="https://platform.openai.com/account/api-keys"
-                    target="_blank"
+        <div class="description container mt-4">
+            <a target="_blank" :href="currentGuide">API Guide</a>
+        </div>
+
+        <div class="main container mx-auto mt-6">
+            <div class="settingsWrapper">
+                <button @click="showApiKeyInput">
+                    <span v-if="!apiKeyNeeded">Set API KEY</span>
+                    <span v-else style="color: red"
+                        >Hide api-key input &#215;</span
+                    >
+                </button>
+                <div v-if="apiKeyNeeded" class="mt-4">
+                    To get an API KEY you need to register new OPEN API account
+                    and then visit
+                    <a
+                        href="https://platform.openai.com/account/api-keys"
+                        target="_blank"
+                    >
+                        https://platform.openai.com/account/api-keys
+                    </a>
+                </div>
+                <InputText
+                    v-if="apiKeyNeeded"
+                    v-model:value="apiKey"
+                    :label="'API Key:'"
+                    class="w-1/2 mt-4"
+                    @update:value="(val) => api.setApiKey(val)"
+                    placeholder="Paste a key here"
+                />
+
+                <button @click="showSettings">
+                    <span v-if="!settings" class="underline">Settings</span>
+                    <span v-else style="color: red">Close settings &#215;</span>
+                </button>
+
+                <OpenAITextSettings
+                    v-if="settings && tab === ''"
+                    v-model:value="textOpts"
                 >
-                    https://platform.openai.com/account/api-keys
-                </a>
+                </OpenAITextSettings>
+
+                <OpenAIImageSettings
+                    v-if="settings && tab === 'image'"
+                    v-model:value="imageOpts.n"
+                >
+                </OpenAIImageSettings>
             </div>
-            <InputText
-                v-model:value="apiKey"
-                :label="'API Key:'"
-                class="w-1/2 mt-4"
-                @update:value="(val) => api.setApiKey(val)"
-                placeholder="Paste a key here"
-            />
-
-            <button @click="showSettings">
-                <span v-if="!settings" class="underline">Settings</span>
-                <span v-else style="color: red">Close settings &#215;</span>
-            </button>
-
-            <OpenAITextSettings
-                v-if="settings && tab === ''"
-                v-model:value="textOpts"
-            >
-            </OpenAITextSettings>
-
-            <OpenAIImageSettings
-                v-if="settings && tab === 'image'"
-                v-model:value="imageOpts.n"
-            >
-            </OpenAIImageSettings>
 
             <Tabs
                 v-model:value="tab"
@@ -45,9 +58,6 @@
                 @click="clearResult()"
                 class="mt-8"
             />
-            <div class="description mt-4">
-                <a target="_blank" :href="currentGuide">API Guide</a>
-            </div>
 
             <InputFile
                 v-if="tab === 'audio'"
@@ -138,6 +148,7 @@ export default defineComponent({
             text: "",
             apiKey: process.env.OPENAI_API_KEY || "",
             api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
+            apiKeyNeeded: false,
         };
     },
     computed: {
@@ -154,6 +165,9 @@ export default defineComponent({
         },
         showSettings() {
             this.settings = !this.settings;
+        },
+        showApiKeyInput() {
+            this.apiKeyNeeded = !this.apiKeyNeeded;
         },
         clearResult() {
             this.result = "";
@@ -219,5 +233,21 @@ export default defineComponent({
 <style lang="scss" scoped>
 a {
     @apply underline text-blue-600 hover:text-blue-800;
+}
+
+.description {
+    text-align: right;
+}
+.settingsWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    button {
+        width: 170px;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #b2aeae;
+        margin-top: 10px;
+    }
 }
 </style>
