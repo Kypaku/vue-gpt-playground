@@ -6,7 +6,7 @@
                 class="mt-1"
                 name="max_tokens"
                 min="50"
-                max="1000"
+                max="4055"
                 :value="value?.max_tokens"
                 label="max_tokens"
                 @update:value="
@@ -19,7 +19,6 @@
             />
             <InputNumber
                 class="mt-1"
-
                 name="temperature"
                 min="0"
                 max="1"
@@ -36,7 +35,6 @@
             />
             <InputNumber
                 class="mt-1"
-
                 name="n"
                 min="0"
                 max="5"
@@ -55,28 +53,28 @@
 </template>
 
 <script lang="ts">
-    import { defineComponent, PropType } from "vue";
-    import { CreateCompletionRequest } from "openai";
-    import InputNumber from "../misc/InputNumber.vue";
+import { defineComponent, PropType } from "vue";
+import { CreateCompletionRequest } from "openai";
+import InputNumber from "../misc/InputNumber.vue";
 
-    export default defineComponent({
-        props: {
-            value: Object as PropType<Partial<CreateCompletionRequest>>,
+export default defineComponent({
+    props: {
+        value: Object as PropType<Partial<CreateCompletionRequest>>,
+    },
+    components: {
+        InputNumber,
+    },
+    data() {
+        return {};
+    },
+    computed: {},
+    methods: {
+        show() {
+            console.log(this.value?.max_tokens);
         },
-        components: {
-            InputNumber,
-        },
-        data() {
-            return {};
-        },
-        computed: {},
-        methods: {
-            show() {
-                console.log(this.value?.max_tokens);
-            },
-        },
+    },
     // mounted() {},
-    });
+});
 </script>
 
 <style lang="scss" scoped>

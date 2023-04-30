@@ -44,12 +44,9 @@
                     v-model:value="textOpts"
                 >
                 </OpenAITextSettings>
-
-                <OpenAIImageSettings
-                    v-if="settings && tab === 'image'"
-                    v-model:value="imageOpts.n"
-                >
-                </OpenAIImageSettings>
+                <button v-if="settings" @click="saveSettings">
+                    Save settings
+                </button>
             </div>
 
             <Tabs
@@ -105,7 +102,6 @@ import InputText from "./components/misc/InputText.vue";
 import InputTextarea from "./components/misc/InputTextarea.vue";
 import Tabs, { ITab } from "./components/misc/Tabs.vue";
 import OpenAITextSettings from "./components/openai/OpenAITextSettings.vue";
-import OpenAIImageSettings from "./components/openai/OpenAIImageSettings.vue";
 import InputFile from "./components/misc/InputFile.vue";
 export default defineComponent({
     components: {
@@ -113,7 +109,6 @@ export default defineComponent({
         InputTextarea,
         InputText,
         OpenAITextSettings,
-        OpenAIImageSettings,
         InputFile,
     },
     data() {
@@ -165,6 +160,9 @@ export default defineComponent({
         },
         showSettings() {
             this.settings = !this.settings;
+        },
+        saveSettings() {
+            localStorage.setItem("settings", JSON.stringify(this.textOpts));
         },
         showApiKeyInput() {
             this.apiKeyNeeded = !this.apiKeyNeeded;
@@ -226,6 +224,11 @@ export default defineComponent({
                 }
             }
         },
+    },
+    mounted() {
+        const savedSettings = localStorage.getItem("settings");
+        if (savedSettings === null) return;
+        this.textOpts = JSON.parse(savedSettings);
     },
 });
 </script>

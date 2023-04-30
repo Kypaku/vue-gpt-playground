@@ -1,5 +1,5 @@
 <template>
-    <div class="speech-recording">
+    <div v-if="mediaRecorder" class="speech-recording">
         <button class="record" @click="record()">Record</button>
         <button class="stop" @click="stop()">Stop</button>
         <div v-if="isLoading">Transcribing...</div>

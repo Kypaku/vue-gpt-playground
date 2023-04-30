@@ -114,11 +114,11 @@ export default class SimpleGPT {
     }
 
     setApiKey(key: string) {
-        const savedKey = window.localStorage.getItem("key");
+        const savedKey = localStorage.getItem("key");
         if (savedKey) {
             this._key = savedKey;
         } else if (key) {
-            window.localStorage.setItem("key", key);
+            localStorage.setItem("key", key);
             this._key = key;
         }
         this._configuration = new Configuration({
