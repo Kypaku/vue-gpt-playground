@@ -1,12 +1,12 @@
 <template>
     <ul class="tabs flex items-center">
         <li
-            class="tab px-2 py-1 cursor-pointer"
-            :class="{active: value ? (value === tab.value) : i === 0}"
+            class="tab px-4 py-2 cursor-pointer flex-grow text-center bg-gray-50 hover:bg-gray-200"
+            :class="{'active bg-gray-200': value ? (value === tab.value) : i === 0}"
             v-for="(tab, i) in tabs" :key="i"
             @click="$emit('update:value', tab.value)"
         >
-            <span>{{ tab.label }}</span>
+            <span class="text-lg" >{{ tab.label }}</span>
         </li>
     </ul>
 </template>

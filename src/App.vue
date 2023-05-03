@@ -1,10 +1,13 @@
 <template>
     <div class="app">
-        <div class="text-2xl w-full text-center mt-10">
-            <b>Vue.js GPT API Sample:</b>
+        <div class="text-5xl w-full text-center mt-10">
+            <b>Vue.js OpenAI API Example</b>
         </div>
-        <div class="description container mt-4">
-            <a target="_blank" :href="currentGuide">API Guide</a>
+        <div class="description container mx-auto mt-8">
+            An example project based on Vue CLI to demonstrate basic OpenAI GPT possibilities. Create your own Chat GPT!
+            <div>
+                <a target="_blank" :href="currentGuide">OpenAI API Guide</a>
+            </div>
         </div>
 
         <div class="main container mx-auto mt-6">
@@ -12,7 +15,7 @@
                 <button @click="showApiKeyInput">
                     <span v-if="!apiKeyNeeded">Set API KEY</span>
                     <span v-else style="color: red"
-                        >Hide api-key input &#215;</span
+                    >Hide api-key input &#215;</span
                     >
                 </button>
                 <div v-if="apiKeyNeeded" class="mt-4">
@@ -53,7 +56,7 @@
                 v-model:value="tab"
                 :tabs="tabs"
                 @click="clearResult()"
-                class="mt-8"
+                class="mt-8 w-full"
             />
 
             <InputFile
@@ -69,7 +72,7 @@
                 v-model:value="prompt"
                 @setPromt="(val) => $emit('update:value', val)"
                 :label="'Prompt:'"
-                class="w-1/2 mt-8"
+                class="mt-8"
                 :rows="10"
             />
             <button
@@ -88,7 +91,7 @@
                 v-model:value="result"
                 :label="'Result:'"
                 disabled
-                class="mt-8 w-1/2"
+                class="mt-8"
                 :rows="10"
             />
         </div>
@@ -96,150 +99,154 @@
 </template>
 
 <script lang="ts">
-import SimpleGPT from "./api/openai";
-import { defineComponent } from "@vue/runtime-core";
-import InputText from "./components/misc/InputText.vue";
-import InputTextarea from "./components/misc/InputTextarea.vue";
-import Tabs, { ITab } from "./components/misc/Tabs.vue";
-import OpenAITextSettings from "./components/openai/OpenAITextSettings.vue";
-import InputFile from "./components/misc/InputFile.vue";
-export default defineComponent({
-    components: {
-        Tabs,
-        InputTextarea,
-        InputText,
-        OpenAITextSettings,
-        InputFile,
-    },
-    data() {
-        return {
-            guides: {
-                code: "https://platform.openai.com/docs/guides/code",
-                text: "https://platform.openai.com/docs/guides/completion",
-                image: "https://platform.openai.com/docs/guides/images/introduction",
+    import SimpleGPT from "./api/openai";
+    import { defineComponent } from "@vue/runtime-core";
+    import InputText from "./components/misc/InputText.vue";
+    import InputTextarea from "./components/misc/InputTextarea.vue";
+    import Tabs, { ITab } from "./components/misc/Tabs.vue";
+    import OpenAITextSettings from "./components/openai/OpenAITextSettings.vue";
+    import InputFile from "./components/misc/InputFile.vue";
+    export default defineComponent({
+        components: {
+            Tabs,
+            InputTextarea,
+            InputText,
+            OpenAITextSettings,
+            InputFile,
+        },
+        data() {
+            return {
+                guides: {
+                    code: "https://platform.openai.com/docs/guides/code",
+                    text: "https://platform.openai.com/docs/guides/completion",
+                    image: "https://platform.openai.com/docs/guides/images/introduction",
+                },
+                settings: false,
+                textOpts: {
+                    temperature: 0,
+                    max_tokens: 200,
+                    n: 1,
+                },
+                imageOpts: {
+                    n: 1,
+                },
+                tab: "",
+                showSpeechRecording: true,
+                isTranscribing: false,
+                tabs: [
+                    { label: "Text", value: "" },
+                    // { label: "Code", value: "code" },
+                    { label: "Image", value: "image" },
+                    { label: "Audio", value: "audio" },
+                ] as ITab[],
+                result: "",
+                isLoading: false,
+                waitResponse: true,
+                prompt: "",
+                text: "",
+                apiKey: process.env.OPENAI_API_KEY || "",
+                api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
+                apiKeyNeeded: false,
+            };
+        },
+        computed: {
+            currentGuide(): string {
+                return (
+                    (this.guides as { [key: string]: string })[this.tab] ||
+                    this.guides.text
+                );
             },
-            settings: false,
-            textOpts: {
-                temperature: 0,
-                max_tokens: 200,
-                n: 1,
+        },
+        methods: {
+            setPrompt(data: string): void {
+                this.prompt = data;
             },
-            imageOpts: {
-                n: 1,
+            showSettings() {
+                this.settings = !this.settings;
             },
-            tab: "",
-            showSpeechRecording: true,
-            isTranscribing: false,
-            tabs: [
-                { label: "Text", value: "" },
-                // { label: "Code", value: "code" },
-                { label: "Image", value: "image" },
-                { label: "Audio", value: "audio" },
-            ] as ITab[],
-            result: "",
-            isLoading: false,
-            waitResponse: true,
-            prompt: "",
-            text: "",
-            apiKey: process.env.OPENAI_API_KEY || "",
-            api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
-            apiKeyNeeded: false,
-        };
-    },
-    computed: {
-        currentGuide(): string {
-            return (
-                (this.guides as { [key: string]: string })[this.tab] ||
-                this.guides.text
-            );
-        },
-    },
-    methods: {
-        setPrompt(data: string): void {
-            this.prompt = data;
-        },
-        showSettings() {
-            this.settings = !this.settings;
-        },
-        saveSettings() {
-            localStorage.setItem("settings", JSON.stringify(this.textOpts));
-        },
-        showApiKeyInput() {
-            this.apiKeyNeeded = !this.apiKeyNeeded;
-        },
-        clearResult() {
-            this.result = "";
-            this.prompt = "";
-        },
-        async runTranscribe(val: any) {
-            if (!this.isTranscribing) {
-                this.isTranscribing = true;
-                try {
-                    const blob = new Blob([val.target.files[0]], {
-                        type: "audio/webm",
-                    });
-                    const formData = new FormData();
-                    formData.append("file", blob, "test.webm");
-                    formData.append("model", "whisper-1");
-                    const token = localStorage.getItem("key");
-                    const requestOptions = {
-                        method: "POST",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                        body: formData,
-                    };
-                    const text = await this.api.transcribe(requestOptions);
-                    this.result = text || "";
-                } catch (e) {
-                    console.error("App error: " + e);
-                } finally {
-                    this.isTranscribing = false;
-                }
-            }
-        },
-        async run() {
-            if (!this.isLoading) {
-                this.isLoading = true;
-                const handlers = {
-                    code: "getCodeFirst",
-                    image: "getImages",
-                } as { [key: string]: string };
-                try {
-                    let res: any = null;
-                    if (this.tab === "image") {
-                        res = await (this.api as any)[
-                            handlers[this.tab] || "getImages"
-                        ](this.prompt, this.imageOpts.n);
-                    } else {
-                        res = await (this.api as any)[
-                            handlers[this.tab] || "get"
-                        ](this.prompt, this.textOpts);
+            saveSettings() {
+                localStorage.setItem("settings", JSON.stringify(this.textOpts));
+            },
+            showApiKeyInput() {
+                this.apiKeyNeeded = !this.apiKeyNeeded;
+            },
+            clearResult() {
+                this.result = "";
+                this.prompt = "";
+            },
+            async runTranscribe(val: any) {
+                if (!this.isTranscribing) {
+                    this.isTranscribing = true;
+                    try {
+                        const blob = new Blob([val.target.files[0]], {
+                            type: "audio/webm",
+                        });
+                        const formData = new FormData();
+                        formData.append("file", blob, "test.webm");
+                        formData.append("model", "whisper-1");
+                        const token = localStorage.getItem("key");
+                        const requestOptions = {
+                            method: "POST",
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                            body: formData,
+                        };
+                        const text = await this.api.transcribe(requestOptions);
+                        this.result = text || "";
+                    } catch (e) {
+                        console.error("App error: " + e);
+                    } finally {
+                        this.isTranscribing = false;
                     }
-                    this.result = res || "";
-                } catch (e) {
-                    console.error("App error: " + e);
-                } finally {
-                    this.isLoading = false;
                 }
-            }
+            },
+            async run() {
+                if (!this.isLoading) {
+                    this.isLoading = true;
+                    const handlers = {
+                        code: "getCodeFirst",
+                        image: "getImages",
+                    } as { [key: string]: string };
+                    try {
+                        let res: any = null;
+                        if (this.tab === "image") {
+                            res = await (this.api as any)[
+                                handlers[this.tab] || "getImages"
+                            ](this.prompt, this.imageOpts.n);
+                        } else {
+                            res = await (this.api as any)[
+                                handlers[this.tab] || "get"
+                            ](this.prompt, this.textOpts);
+                        }
+                        this.result = res || "";
+                    } catch (e) {
+                        console.error("App error: " + e);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                }
+            },
         },
-    },
-    mounted() {
-        const savedSettings = localStorage.getItem("settings");
-        if (savedSettings === null) return;
-        this.textOpts = JSON.parse(savedSettings);
-    },
-});
+        mounted() {
+            const savedSettings = localStorage.getItem("settings");
+            if (savedSettings === null) return;
+            this.textOpts = JSON.parse(savedSettings);
+        },
+    });
 </script>
 
 <style lang="scss" scoped>
+    .container{
+        max-width: 900px;
+    }
+
 a {
     @apply underline text-blue-600 hover:text-blue-800;
 }
 
 .description {
-    text-align: right;
+    // text-align: right;
 }
 .settingsWrapper {
     display: flex;
