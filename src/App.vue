@@ -53,7 +53,7 @@
                 v-model:value="tab"
                 :tabs="tabs"
                 @click="clearResult()"
-                class="mt-8"
+                class="mt-8 w-full"
             />
 
             <InputFile
