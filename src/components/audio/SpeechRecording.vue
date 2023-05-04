@@ -21,7 +21,6 @@ export default defineComponent({
             mediaRecorder: null as any,
             chunks: [] as any,
             recordedResult: "",
-            apiKey: process.env.OPENAI_API_KEY || "",
             api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
             isLoading: false,
         };

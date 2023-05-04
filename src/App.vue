@@ -10,12 +10,12 @@
         <div class="main container mx-auto mt-6">
             <div class="settingsWrapper">
                 <button @click="showApiKeyInput">
-                    <span v-if="!apiKeyNeeded">Set API KEY</span>
+                    <span v-if="!apiKeyVisible">Set API KEY</span>
                     <span v-else style="color: red"
                         >Hide api-key input &#215;</span
                     >
                 </button>
-                <div v-if="apiKeyNeeded" class="mt-4">
+                <div v-if="apiKeyVisible" class="mt-4">
                     To get an API KEY you need to register new OPEN API account
                     and then visit
                     <a
@@ -26,11 +26,15 @@
                     </a>
                 </div>
                 <InputText
-                    v-if="apiKeyNeeded"
+                    v-if="apiKeyVisible"
                     v-model:value="apiKey"
                     :label="'API Key:'"
                     class="w-1/2 mt-4"
-                    @update:value="(val) => api.setApiKey(val)"
+                    @update:value="
+                        (val) => {
+                            api.setApiKey(val), (apiKeyNeeded = false);
+                        }
+                    "
                     placeholder="Paste a key here"
                 />
 
@@ -65,6 +69,7 @@
             <InputTextarea
                 v-if="tab !== 'audio'"
                 :showSpeechRecording="showSpeechRecording"
+                :apiKeyNeeded="apiKeyNeeded"
                 isLoading
                 v-model:value="prompt"
                 @setPromt="(val) => $emit('update:value', val)"
@@ -144,6 +149,7 @@ export default defineComponent({
             apiKey: process.env.OPENAI_API_KEY || "",
             api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
             apiKeyNeeded: false,
+            apiKeyVisible: false,
         };
     },
     computed: {
@@ -155,6 +161,12 @@ export default defineComponent({
         },
     },
     methods: {
+        stopRunning() {
+            if (this.apiKeyNeeded) {
+                alert("Enter your API KEY");
+                return null;
+            }
+        },
         setPrompt(data: string): void {
             this.prompt = data;
         },
@@ -165,13 +177,17 @@ export default defineComponent({
             localStorage.setItem("settings", JSON.stringify(this.textOpts));
         },
         showApiKeyInput() {
-            this.apiKeyNeeded = !this.apiKeyNeeded;
+            this.apiKeyVisible = !this.apiKeyVisible;
         },
         clearResult() {
             this.result = "";
             this.prompt = "";
         },
         async runTranscribe(val: any) {
+            if (this.apiKeyNeeded) {
+                alert("Enter your API KEY");
+                return null;
+            }
             if (!this.isTranscribing) {
                 this.isTranscribing = true;
                 try {
@@ -199,6 +215,10 @@ export default defineComponent({
             }
         },
         async run() {
+            if (this.apiKeyNeeded) {
+                alert("Enter your API KEY");
+                return null;
+            }
             if (!this.isLoading) {
                 this.isLoading = true;
                 const handlers = {
@@ -229,6 +249,9 @@ export default defineComponent({
         const savedSettings = localStorage.getItem("settings");
         if (savedSettings === null) return;
         this.textOpts = JSON.parse(savedSettings);
+
+        const savedKey = localStorage.getItem("key");
+        if (!savedKey) this.apiKeyNeeded = true;
     },
 });
 </script>

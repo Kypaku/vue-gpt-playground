@@ -4,7 +4,7 @@
             <label :for="id" class="mr-2">{{ label }}</label>
         </div>
         <SpeechRecording
-            v-if="showSpeechRecording"
+            v-if="showSpeechRecording && !apiKeyNeeded"
             @update:value="(val) => $emit('update:value', val)"
         ></SpeechRecording>
         <textarea
@@ -34,6 +34,7 @@ export default defineComponent({
         disabled: Boolean,
         isLoading: Boolean,
         showSpeechRecording: Boolean,
+        apiKeyNeeded: Boolean,
     },
     components: {
         SpeechRecording,
