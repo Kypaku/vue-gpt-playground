@@ -1,6 +1,8 @@
 <template>
     <div class="speech-recording">
-        <button :disabled="recordDisabled" @click="record()">&#127908;</button>
+        <button :disabled="recordDisabled || !mediaRecorder" @click="record()">
+            &#127908;
+        </button>
         <button :disabled="stopDisabled" @click="stop()">
             <span class="stop"></span>
         </button>
