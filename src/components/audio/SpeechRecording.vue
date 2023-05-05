@@ -1,7 +1,9 @@
 <template>
-    <div v-if="mediaRecorder" class="speech-recording">
-        <button class="record" @click="record()">Record</button>
-        <button class="stop" @click="stop()">Stop</button>
+    <div class="speech-recording">
+        <button :disabled="recordDisabled" @click="record()">&#127908;</button>
+        <button :disabled="stopDisabled" @click="stop()">
+            <span class="stop"></span>
+        </button>
         <div v-if="isLoading">Transcribing...</div>
     </div>
 </template>
@@ -23,6 +25,8 @@ export default defineComponent({
             recordedResult: "",
             api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
             isLoading: false,
+            recordDisabled: false,
+            stopDisabled: true,
         };
     },
     computed: {},
@@ -32,11 +36,14 @@ export default defineComponent({
                 alert("You have a problem with your device");
             }
             this.mediaRecorder.start();
+            this.recordDisabled = true;
+            this.stopDisabled = false;
             this.mediaRecorder.onstop = this.onStop;
             this.mediaRecorder.ondataavailable = this.ondataAvailable;
         },
         stop() {
             this.mediaRecorder.stop();
+            this.stopDisabled = true;
             this.isLoading = true;
         },
         async onStop() {
@@ -63,6 +70,7 @@ export default defineComponent({
             const text = await this.api.transcribe(requestOptions);
             this.$emit("update:value", text);
             this.isLoading = false;
+            this.recordDisabled = false;
             console.log(text);
         },
         ondataAvailable(e: any) {
@@ -88,12 +96,27 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .speech-recording {
+    display: flex;
+    align-items: center;
     margin: 10px 0;
     button {
-        padding: 5px;
+        width: 36px;
+        height: 36px;
         margin-right: 10px;
         border-radius: 5px;
         border: 1px solid #b2aeae;
+        &:disabled {
+            cursor: not-allowed;
+            background-color: #f6f6f6;
+        }
+    }
+    .stop {
+        display: block;
+        margin: auto;
+        width: 16px;
+        height: 16px;
+        border-radius: 2px;
+        background: #ee8181;
     }
 }
 </style>
