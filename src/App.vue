@@ -3,13 +3,13 @@
         <div class="text-2xl w-full text-center mt-10">
             <b>Vue.js GPT API Sample:</b>
         </div>
-        <div class="description container mt-4">
+        <div class="description container mt-4 pr-2">
             <a target="_blank" :href="currentGuide">API Guide</a>
         </div>
 
-        <div class="main container mx-auto mt-6">
+        <div class="main container mx-auto mt-6 pl-1 pb-3">
             <div class="settingsWrapper">
-                <button @click="showApiKeyInput">
+                <button @click="showApiKeyInput" class="bg-white">
                     <span v-if="!apiKeyVisible">Set API KEY</span>
                     <span v-else style="color: red"
                         >Hide api-key input &#215;</span
@@ -29,7 +29,7 @@
                     v-if="apiKeyVisible"
                     v-model:value="apiKey"
                     :label="'API Key:'"
-                    class="w-1/2 mt-4"
+                    class="w-3/4 mt-4"
                     @update:value="
                         (val) => {
                             api.setApiKey(val), (apiKeyNeeded = false);
@@ -38,7 +38,7 @@
                     placeholder="Paste a key here"
                 />
 
-                <button @click="showSettings">
+                <button @click="showSettings" class="bg-white">
                     <span v-if="!settings" class="underline">Settings</span>
                     <span v-else style="color: red">Close settings &#215;</span>
                 </button>
@@ -74,7 +74,7 @@
                 v-model:value="prompt"
                 @setPromt="(val) => $emit('update:value', val)"
                 :label="'Prompt:'"
-                class="w-1/2 mt-8"
+                class="w-4/5 rounded-lg mt-8 p-1"
                 :rows="10"
             />
             <button
@@ -93,7 +93,7 @@
                 v-model:value="result"
                 :label="'Result:'"
                 disabled
-                class="mt-8 w-1/2"
+                class="mt-8 p-1 w-4/5 rounded-lg bg-white"
                 :rows="10"
             />
         </div>
@@ -259,6 +259,13 @@ export default defineComponent({
 <style lang="scss" scoped>
 a {
     @apply underline text-blue-600 hover:text-blue-800;
+}
+.app {
+    background: linear-gradient(
+        to right,
+        rgb(202, 245, 194),
+        rgb(223, 207, 239)
+    );
 }
 
 .description {

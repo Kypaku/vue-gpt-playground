@@ -1,7 +1,7 @@
 <template>
     <ul class="tabs flex items-center">
         <li
-            class="tab px-4 py-2 cursor-pointer flex-grow text-center bg-gray-50 hover:bg-gray-200"
+            class="tab px-4 py-2 cursor-pointer flex-grow mr-1 text-center bg-gray-50 hover:bg-gray-200"
             :class="{
                 'active bg-gray-200': value ? value === tab.value : i === 0,
             }"

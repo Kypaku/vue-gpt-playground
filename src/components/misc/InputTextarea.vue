@@ -9,7 +9,7 @@
         ></SpeechRecording>
         <textarea
             type="text"
-            class="border-2"
+            class="border-2 rounded-lg p-1"
             ref="input"
             :id="id"
             :value="value"
