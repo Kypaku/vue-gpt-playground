@@ -1,7 +1,7 @@
 <template>
     <ul class="tabs flex items-center">
         <li
-            class="tab px-4 py-2 cursor-pointer flex-grow mr-1 text-center bg-gray-50 hover:bg-gray-200"
+            class="tab px-4 py-2 cursor-pointer flex-grow text-center"
             :class="{
                 'active bg-gray-200': value ? value === tab.value : i === 0,
             }"
@@ -39,6 +39,13 @@
 </script>
 
 <style lang="scss" scoped>
+    .tab{
+        background: rgb(214, 249, 231);
+        &:hover, &.active{
+            background: rgb(216, 242, 227);
+        }
+    }
+
 .active {
     border-bottom: 2px solid rgb(102, 102, 102);
 }

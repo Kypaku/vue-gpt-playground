@@ -4,6 +4,7 @@
         <input
             type="text"
             class="border-2 px-2 py-1 rounded"
+            :class="{error}"
             ref="input"
             :id="id"
             :value="value"
@@ -16,33 +17,40 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+    import { defineComponent } from "vue";
 
-export default defineComponent({
-    props: {
-        rows: {
-            type: Number,
+    export default defineComponent({
+        props: {
+            error: {
+                type: Boolean,
+                default: () => false
+            },
+            rows: {
+                type: Number,
+            },
+            placeholder: String,
+            label: String,
+            value: String,
         },
-        placeholder: String,
-        label: String,
-        value: String,
-    },
-    components: {},
-    data() {
-        return {
-            id: "input-text" + +new Date(),
-        };
-    },
-    computed: {},
-    methods: {},
-    mounted() {
-        this.$emit("mounted", this.$refs.input);
-    },
-});
+        components: {},
+        data() {
+            return {
+                id: "input-text" + +new Date(),
+            };
+        },
+        computed: {},
+        methods: {},
+        mounted() {
+            this.$emit("mounted", this.$refs.input);
+        },
+    });
 </script>
 
 <style lang="scss" scoped>
 .first {
     font-weight: 700;
 }
+.error{
+        @apply border-red-400;
+    }
 </style>

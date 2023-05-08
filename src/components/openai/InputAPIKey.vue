@@ -12,10 +12,11 @@
         <InputText
             :value="value"
             type="password"
+            :error="!value"
             :label="'API Key:'"
-            class="w-1/2 mt-2"
+            class="mt-2"
             @update:value="(val) => ($emit('update:value', val), useLocalStorage && ls(localStorageKey, val))"
-            placeholder="Paste a key here"
+            placeholder="Paste an API key here"
         />
     </div>
 </template>

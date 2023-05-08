@@ -29,6 +29,7 @@ module.exports = {
         "no-throw-literal": "warn",
         "prefer-regex-literals": "warn",
         "no-multiple-empty-lines": "warn",
+        'no-unused-expressions': 'warn',
         "no-useless-escape": "warn",
         "vue/multi-word-component-names": "warn",
         "no-return-assign": "warn",
