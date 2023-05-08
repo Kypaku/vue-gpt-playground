@@ -3,22 +3,22 @@
         <div class="text-5xl w-full text-center mt-10">
             <b>Vue.js OpenAI API Example</b>
         </div>
-        <div class="description container mx-auto mt-8">
+        <div class="description container mx-auto mt-8 pr-2">
             An example project based on Vue CLI to demonstrate basic OpenAI GPT possibilities. Create your own Chat GPT!
             <div>
                 <a target="_blank" :href="currentGuide">OpenAI API Guide</a>
             </div>
         </div>
 
-        <div class="main container mx-auto mt-6">
+        <div class="main container mx-auto mt-6 pl-1 pb-3">
             <div class="settingsWrapper">
-                <button @click="showApiKeyInput">
-                    <span v-if="!apiKeyNeeded">Set API KEY</span>
+                <button @click="showApiKeyInput" class="bg-white">
+                    <span v-if="!apiKeyVisible">Set API KEY</span>
                     <span v-else style="color: red"
                     >Hide api-key input &#215;</span
                     >
                 </button>
-                <div v-if="apiKeyNeeded" class="mt-4">
+                <div v-if="apiKeyVisible" class="mt-4">
                     To get an API KEY you need to register new OPEN API account
                     and then visit
                     <a
@@ -29,15 +29,19 @@
                     </a>
                 </div>
                 <InputText
-                    v-if="apiKeyNeeded"
+                    v-if="apiKeyVisible"
                     v-model:value="apiKey"
                     :label="'API Key:'"
-                    class="w-1/2 mt-4"
-                    @update:value="(val) => api.setApiKey(val)"
+                    class="w-3/4 mt-4"
+                    @update:value="
+                        (val) => {
+                            api.setApiKey(val), (apiKeyNeeded = false);
+                        }
+                    "
                     placeholder="Paste a key here"
                 />
 
-                <button @click="showSettings">
+                <button @click="showSettings" class="bg-white">
                     <span v-if="!settings" class="underline">Settings</span>
                     <span v-else style="color: red">Close settings &#215;</span>
                 </button>
@@ -68,11 +72,12 @@
             <InputTextarea
                 v-if="tab !== 'audio'"
                 :showSpeechRecording="showSpeechRecording"
+                :apiKeyNeeded="apiKeyNeeded"
                 isLoading
                 v-model:value="prompt"
                 @setPromt="(val) => $emit('update:value', val)"
                 :label="'Prompt:'"
-                class="mt-8"
+                class="w-4/5 rounded-lg mt-8 p-1"
                 :rows="10"
             />
             <button
@@ -91,7 +96,7 @@
                 v-model:value="result"
                 :label="'Result:'"
                 disabled
-                class="mt-8"
+                class="mt-8 w-1/2"
                 :rows="10"
             />
         </div>
@@ -147,6 +152,7 @@
                 apiKey: process.env.OPENAI_API_KEY || "",
                 api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
                 apiKeyNeeded: false,
+                apiKeyVisible: false,
             };
         },
         computed: {
@@ -158,6 +164,12 @@
             },
         },
         methods: {
+            stopRunning() {
+                if (this.apiKeyNeeded) {
+                    alert("Enter your API KEY");
+                    return null;
+                }
+            },
             setPrompt(data: string): void {
                 this.prompt = data;
             },
@@ -168,13 +180,17 @@
                 localStorage.setItem("settings", JSON.stringify(this.textOpts));
             },
             showApiKeyInput() {
-                this.apiKeyNeeded = !this.apiKeyNeeded;
+                this.apiKeyVisible = !this.apiKeyVisible;
             },
             clearResult() {
                 this.result = "";
                 this.prompt = "";
             },
             async runTranscribe(val: any) {
+                if (this.apiKeyNeeded) {
+                    alert("Enter your API KEY");
+                    return null;
+                }
                 if (!this.isTranscribing) {
                     this.isTranscribing = true;
                     try {
@@ -202,6 +218,10 @@
                 }
             },
             async run() {
+                if (this.apiKeyNeeded) {
+                    alert("Enter your API KEY");
+                    return null;
+                }
                 if (!this.isLoading) {
                     this.isLoading = true;
                     const handlers = {
@@ -232,21 +252,26 @@
             const savedSettings = localStorage.getItem("settings");
             if (savedSettings === null) return;
             this.textOpts = JSON.parse(savedSettings);
+
+            const savedKey = localStorage.getItem("key");
+            if (!savedKey) this.apiKeyNeeded = true;
         },
     });
 </script>
 
-<style lang="scss" scoped>
-    .container{
-        max-width: 900px;
-    }
-
-a {
+<style lang="scss" scoped>a {
     @apply underline text-blue-600 hover:text-blue-800;
+}
+.app {
+    background: linear-gradient(
+        to right,
+        rgb(202, 245, 194),
+        rgb(223, 207, 239)
+    );
 }
 
 .description {
-    // text-align: right;
+    text-align: right;
 }
 .settingsWrapper {
     display: flex;

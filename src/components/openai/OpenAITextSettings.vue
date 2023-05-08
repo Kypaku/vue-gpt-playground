@@ -6,7 +6,7 @@
                 class="mt-1"
                 name="max_tokens"
                 min="50"
-                max="4055"
+                max="4054"
                 :value="value?.max_tokens"
                 label="max_tokens"
                 @update:value="
