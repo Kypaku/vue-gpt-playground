@@ -56,6 +56,7 @@
 
             <InputFile
                 class="mt-4"
+                :accept="['.m4a', '.mp3', '.webm', '.mp4', '.mpga', '.wav', '.mpeg']"
                 v-if="tab === 'audio'"
                 @update:value="(val) => runTranscribe(val)"
             ></InputFile>
@@ -196,7 +197,7 @@
                     return null;
                 }
                 if (!this.isTranscribing) {
-                    this.error = ''
+                    this.error = "";
                     this.isTranscribing = true;
                     try {
                         const blob = new Blob([val.target.files[0]], {
@@ -233,7 +234,7 @@
                     return null;
                 }
                 if (!this.isLoading) {
-                    this.error = ''
+                    this.error = "";
                     this.isLoading = true;
                     const handlers = {
                         code: "getCodeFirst",

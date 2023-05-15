@@ -39,13 +39,12 @@ export default class SimpleGPT {
             options
         ).then((response) => {
             if (response.ok) {
-                return response.json();
+                return response?.json?.();
             } else {
                 Promise.reject(response)
             }
         });
-        const json = await response.json();
-        return json.text;
+        return response.text
     }
 
     async get(prompt: string, opts?: Partial<CreateCompletionRequest & CreateChatCompletionRequest>): Promise<null | string[]> {
