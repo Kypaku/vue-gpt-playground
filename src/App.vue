@@ -47,10 +47,7 @@
                 v-model:value="settings"
                 class="mt-3 api-key"
             >
-                <OpenAITextSettings
-                    v-if="settings && tab === ''"
-                    v-model:value="textOpts"
-                >
+                <OpenAITextSettings v-if="settings" v-model:value="textOpts">
                 </OpenAITextSettings>
                 <button v-if="settings" @click="saveSettings">
                     Save settings
@@ -211,6 +208,7 @@ export default defineComponent({
         clearResult() {
             this.result = "";
             this.prompt = "";
+            this.error = "";
         },
         async runTranscribe(val: any) {
             if (!this.apiKey) {
