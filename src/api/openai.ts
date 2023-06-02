@@ -1,5 +1,6 @@
 
 import { Configuration, OpenAIApi, CreateCompletionRequest, CreateChatCompletionRequest, CreateImageRequestSizeEnum } from "openai";
+import https from "https";
 class CustomFormData extends FormData {
     getHeaders() {
         return {};
@@ -41,10 +42,79 @@ export default class SimpleGPT {
             if (response.ok) {
                 return response?.json?.();
             } else {
-                Promise.reject(response)
+                Promise.reject(response);
             }
         });
-        return response.text
+        return response.text;
+    }
+
+    async getStream(prompt: string, fData: (raw: any, json: {[key: string]: any}, delta: string) => any, fEnd: any, opts?: Partial<CreateCompletionRequest & CreateChatCompletionRequest>): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const model = opts?.model || this.defaultOptsGPT.model || "";
+
+            const isChatModel = this.chatModels.indexOf(model) >= 0;
+            const _prompt = (prompt || opts?.prompt);
+            const messages = opts?.messages || [{ role: "user", content: _prompt as string }];
+
+            const endpoint = isChatModel ? "/v1/chat/completions" : "/v1/completions";
+
+            const req = https.request({
+                hostname: "api.openai.com",
+                port: 443,
+                path: endpoint,
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + this._key
+                }
+            }, function(res) {
+                res.on("data", (chunk) => {
+                    try {
+                        let delta = "";
+                        const lines = chunk?.toString()?.split("\n") || [];
+                        const line = lines.filter((line: string) => line.trim()).at(-1);
+                        const data = line.toString().replace("data:", "").replace("[DONE]", "").replace("data: [DONE]", "").trim();
+                        if (data) {
+                            const json = JSON.parse(data);
+                            json.choices.forEach((choice: any) => {
+                                delta += choice.text || choice.message?.content || choice.delta?.content || "";
+                            });
+                            fData(chunk.toString(), json, delta);
+                        }
+                    } catch (e) {
+                        console.error("getStream handle chunk error:", e, chunk.toString());
+                    }
+                });
+                res.on("end", () => {
+                    fEnd();
+                    resolve();
+                });
+            });
+            const body = JSON.stringify({
+                model,
+                prompt: isChatModel ? undefined : _prompt,
+                messages: messages,
+                temperature: opts?.temperature || this.defaultOptsGPT.temperature,
+                max_tokens: opts?.max_tokens || this.defaultOptsGPT.max_tokens || 0,
+                top_p: opts?.top_p || 1,
+                frequency_penalty: opts?.frequency_penalty || this.defaultOptsGPT.frequency_penalty,
+                presence_penalty: opts?.presence_penalty || this.defaultOptsGPT.presence_penalty,
+                stream: opts?.stream || true,
+            });
+
+            req.on("error", (e) => {
+                console.error("problem with request:" + e.message);
+            });
+
+            req.write(body);
+
+            req.end();
+        // const response = await this._openai?.createChatCompletion({
+        //     stream: true,
+        // }, { responseType: 'stream' });
+        // (response as any)?.data.on('data', console.log)
+        // return response
+        });
     }
 
     async get(prompt: string, opts?: Partial<CreateCompletionRequest & CreateChatCompletionRequest>): Promise<null | string[]> {

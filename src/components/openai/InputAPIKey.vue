@@ -31,7 +31,7 @@
         props: {
             localStorageKey: {
                 type: String,
-                default: () => 'openAIKey'
+                default: () => "apiKey"
             },
             useLocalStorage: {
                 type: Boolean,
@@ -62,6 +62,12 @@
         },
         methods: {
 
+        },
+
+        created () {
+            if (this.useLocalStorage) {
+                this.$emit('update:value', ls(this.localStorageKey));
+            }
         },
     });
 

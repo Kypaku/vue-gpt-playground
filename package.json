@@ -1,6 +1,6 @@
 {
   "name": "vue-gpt-sample",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -10,6 +10,7 @@
   "dependencies": {
     "autoprefixer": "^9.8.8",
     "core-js": "^3.6.5",
+    "eventsource-parser": "^1.0.0",
     "local-storage": "^2.0.0",
     "openai": "^3.2.1",
     "postcss": "^8",

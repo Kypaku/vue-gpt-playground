@@ -1,7 +1,7 @@
 <template>
     <div class="app pt-10">
         <div class="text-5xl w-full text-center">
-            <b>Vue.js OpenAI API Example</b>
+            <b>Vue.js OpenAI API Playground</b>
         </div>
 
         <div class="main container mx-auto mt-6 pl-1 pb-3">
@@ -38,12 +38,12 @@
             </Accordeon>
             <Accordeon title="Settings" v-model:value="settings" class="mt-3 api-key" >
                 <OpenAITextSettings
-                    v-if="settings && tab === ''"
+                    v-if="settings"
                     v-model:value="textOpts"
                 >
                 </OpenAITextSettings>
-                <button v-if="settings" @click="saveSettings">
-                    Save settings
+                <button v-if="settings" class="save-button"  @click="saveSettings">
+                    {{ savedSettings ? "Saved!" : "Save" }}
                 </button>
             </Accordeon>
 
@@ -58,9 +58,12 @@
                 class="mt-4"
                 :accept="['.m4a', '.mp3', '.webm', '.mp4', '.mpga', '.wav', '.mpeg']"
                 v-if="tab === 'audio'"
-                @update:value="(val) => runTranscribe(val)"
+                v-model:value="audioFile"
             ></InputFile>
-            <div v-if="isTranscribing">Transcribing...</div>
+            <div class="mt-4">
+                <InputText v-model:value="whisperLanguage" class="language-input" :placeholder="'empty for auto'"  v-if="tab === 'audio'" :suggestions="langCodes" label="Input language (code):" />
+            </div>
+            <!-- <div v-if="isTranscribing">Transcribing...</div> -->
 
             <InputTextarea
                 v-if="tab !== 'audio'"
@@ -74,9 +77,8 @@
                 :rows="10"
             />
             <button
-                v-if="tab !== 'audio'"
-                :disabled="isLoading || !prompt"
-                @click="run"
+                :disabled="tab !== 'audio' ? isLoading || !prompt : isTranscribing || !audioFile"
+                @click="tab === 'audio' ? runTranscribe(audioFile) : run()"
                 class="mt-2 bg-gray-300 run-btn px-8 py-2 text-white rounded"
             >
                 <b>{{ isLoading ? "Loading..." : "Run" }}</b>
@@ -112,9 +114,13 @@
     import Accordeon from "./components/misc/Accordeon.vue";
     import InputAPIKey from "./components/openai/InputAPIKey.vue";
     import ls from "local-storage";
+    import { openAIStream } from "./helpers/openAIStream";
+    import InputText, { InputTextSuggestion } from "./components/misc/InputText.vue";
+    import { languageCodes } from "./helpers";
 
     export default defineComponent({
         components: {
+            InputText,
             Tabs,
             InputTextarea,
             OpenAITextSettings,
@@ -125,6 +131,9 @@
         },
         data() {
             return {
+                audioFile: null,
+                savedSettings: false,
+                whisperLanguage: "",
                 error: "",
                 guides: {
                     code: "https://platform.openai.com/docs/guides/code",
@@ -136,6 +145,8 @@
                     temperature: 0,
                     max_tokens: 200,
                     n: 1,
+                    model: "gpt-3.5-turbo-0301",
+                    streams: true,
                 },
                 imageOpts: {
                     n: 1,
@@ -161,6 +172,13 @@
             };
         },
         computed: {
+            langCodes(): InputTextSuggestion[] {
+                return languageCodes.map((code) => ({
+                    name: code,
+                    value: code,
+                }));
+            },
+
             currentGuide(): string {
                 return (
                     (this.guides as { [key: string]: string })[this.tab] ||
@@ -183,6 +201,10 @@
             },
             saveSettings() {
                 localStorage.setItem("settings", JSON.stringify(this.textOpts));
+                this.savedSettings = true;
+                setTimeout(() => {
+                    this.savedSettings = false;
+                }, 5000);
             },
             showApiKeyInput() {
                 this.apiKeyVisible = !this.apiKeyVisible;
@@ -190,6 +212,7 @@
             clearResult() {
                 this.result = "";
                 this.prompt = "";
+                this.error = "";
             },
             async runTranscribe(val: any) {
                 if (!this.apiKey) {
@@ -206,6 +229,7 @@
                         const formData = new FormData();
                         formData.append("file", blob, "test.webm");
                         formData.append("model", "whisper-1");
+                        formData.append("language", this.whisperLanguage);
                         const requestOptions = {
                             method: "POST",
                             headers: {
@@ -228,34 +252,45 @@
                     }
                 }
             },
+            scrollToResult() {
+                setTimeout(() => {
+                    (this.$refs?.result as any)?.scrollIntoView?.();
+                    (this.$refs?.result as any)?.$el?.scrollIntoView?.();
+                }, 0);
+            },
             async run() {
                 if (!this.apiKey) {
                     alert("You need to set your API KEY before running");
                     return null;
                 }
                 if (!this.isLoading) {
+                    this.result = "";
                     this.error = "";
                     this.isLoading = true;
-                    const handlers = {
-                        code: "getCodeFirst",
-                        image: "getImages",
-                    } as { [key: string]: string };
                     try {
                         let res: any = null;
                         if (this.tab === "image") {
-                            res = await (this.api as any)[
-                                handlers[this.tab] || "getImages"
-                            ](this.prompt, this.imageOpts.n);
+                            res = await this.api.getImages(this.prompt, this.imageOpts.n);
+                            this.result = res || "";
+                            this.scrollToResult();
+                        } else if (!this.textOpts.streams) {
+                            res = await this.api.get(this.prompt, this.textOpts);
+                            this.result = res || "";
+                            this.scrollToResult();
                         } else {
-                            res = await (this.api as any)[
-                                handlers[this.tab] || "get"
-                            ](this.prompt, this.textOpts);
+                            const fData = (raw: string, json: any, delta: string) => {
+                                try {
+                                    this.result += delta || "";
+                                    this.scrollToResult();
+                                } catch (e) {
+                                    console.error("Error parsing data", e, raw);
+                                }
+                            };
+                            const fEnd = () => {
+                                console.log("END");
+                            };
+                            const stream = await this.api.getStream(this.prompt, fData, fEnd, this.textOpts); // await openAIStream({messages: [{role: 'user', content: this.prompt}], stream: true, model: this.textOpts?.model} as any, this.apiKey);
                         }
-                        this.result = res || "";
-                        setTimeout(() => {
-                            (this.$refs?.result as any)?.scrollIntoView?.();
-                            (this.$refs?.result as any)?.$el?.scrollIntoView?.();
-                        }, 0);
                     } catch (e: any) {
                         console.error("App error: " + e);
                         if (e?.response?.data?.error?.message) {
@@ -286,6 +321,18 @@
 </script>
 
 <style lang="scss" scoped>
+    .language-input{
+        width: 200px;
+    }
+
+    .save-button{
+        background: rgb(102, 102, 102);
+        color: white;
+        border-radius: 4px;
+        padding: 2px 8px;
+        margin-top: 16px;
+    }
+
     .run-btn{
         background: #7759de;
         &:disabled {
@@ -295,7 +342,7 @@
     }
 
     ::v-deep .api-key{
-        width: 500px;
+        width: 375px;
         max-width: 100%;
         .tab__link {
             background: #e0f7ea;
@@ -306,29 +353,29 @@
     }
 
     .main{
-        width: 900px;
+        max-width: 900px;
     }
-a {
-    @apply underline text-blue-600 hover:text-blue-800;
-}
-.app {
-    background: linear-gradient(to bottom, rgb(255 255 255), rgb(206 255 228));
-    min-height: 100vh;
-}
+    a {
+        @apply underline text-blue-600 hover:text-blue-800;
+    }
+    .app {
+        background: linear-gradient(to bottom, rgb(255 255 255), rgb(206 255 228));
+        min-height: 100vh;
+    }
 
-.description {
-    text-align: left;
-}
-.settingsWrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    button {
-        width: 170px;
-        padding: 5px;
-        border-radius: 5px;
-        border: 1px solid #b2aeae;
-        margin-top: 10px;
+    .description {
+        text-align: left;
     }
-}
+    .settingsWrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        button {
+            width: 170px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #b2aeae;
+            margin-top: 10px;
+        }
+    }
 </style>

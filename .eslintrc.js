@@ -32,6 +32,7 @@ module.exports = {
         'no-unused-expressions': 'warn',
         "no-useless-escape": "warn",
         "vue/multi-word-component-names": "warn",
+        "@typescript-eslint/no-explicit-any": "warn",
         "no-return-assign": "warn",
         "object-curly-spacing": "warn",
         "quote-props": "warn",

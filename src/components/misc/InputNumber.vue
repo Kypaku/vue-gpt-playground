@@ -1,14 +1,16 @@
 <template>
     <div class="input-numder">
         <label class="mr-2">{{ label }}</label>
-        <input
-            v-bind="$attrs"
-            class="border-2 px-2 py-1 rounded" 
-            type="number"
-            placeholder="enter value"
-            :value="value"
-            @input="$emit('update:value', +$event.target?.value)"
-        />
+        <div class="text-left">
+            <input
+                v-bind="$attrs"
+                class="border-2 px-2 py-1 rounded w-full" 
+                type="number"
+                placeholder="enter value"
+                :value="value"
+                @input="$emit('update:value', +$event.target?.value)"
+            />
+        </div>
     </div>
 </template>
 
