@@ -5,8 +5,11 @@ To get an API KEY you need to register new OPEN AI account and then visit https:
 
 ## Features:
 Streams
+
 Chat/Completeions
+
 DALL-E
+
 Transcribing audio
 
 ## Clone:
