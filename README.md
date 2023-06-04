@@ -3,6 +3,12 @@ To get an API KEY you need to register new OPEN AI account and then visit https:
 
 [Demo](http://kypaku.ru/pages/vue-gpt-playground/)
 
+## Features:
+Streams
+Chat/Completeions
+DALL-E
+Transcribing audio
+
 ## Clone:
 ```
 git clone https://github.com/Kypaku/vue-gpt-playground
