@@ -11,31 +11,7 @@
                     <a target="_blank" :href="currentGuide">OpenAI API Guide</a>
                 </div>
             </div>
-            <Accordeon title="Set API KEY" v-model:value="apiKeyVisible" class="mt-8 api-key" >
-                <div>
-                    <span class="text-sm" >
-                        To get an API KEY you need to register new OPEN API account
-                        and then visit
-                    </span>
-                    <a
-                        href="https://platform.openai.com/account/api-keys"
-                        target="_blank"
-                    >
-                        https://platform.openai.com/account/api-keys
-                    </a>
-                </div>
-                <InputAPIKey
-                    v-model:value="apiKey"
-                    class="w-3/4 mt-4"
-                    :useLocalStorage="true"
-                    @update:value="
-                        (val) => {
-                            api.setApiKey(val), (apiKeyNeeded = false);
-                        }
-                    "
-                    placeholder="Paste a key here"
-                />
-            </Accordeon>
+            <APIKey v-model:value="apiKey" @update:value="(val) => (api.setApiKey(val), (apiKeyNeeded = false))"/>
             <Accordeon title="Settings" v-model:value="settings" class="mt-3 api-key" >
                 <OpenAITextSettings
                     v-if="settings"
@@ -63,7 +39,6 @@
             <div class="mt-4">
                 <InputText v-model:value="whisperLanguage" class="language-input" :placeholder="'empty for auto'"  v-if="tab === 'audio'" :suggestions="langCodes" label="Input language (code):" />
             </div>
-            <!-- <div v-if="isTranscribing">Transcribing...</div> -->
 
             <InputTextarea
                 v-if="tab !== 'audio'"
@@ -98,7 +73,6 @@
                 ref="result"
             />
             <Error :value="error" v-if="error" class="mt-2"  />
-
         </div>
     </div>
 </template>
@@ -112,21 +86,20 @@
     import OpenAITextSettings from "./components/openai/OpenAITextSettings.vue";
     import InputFile from "./components/misc/InputFile.vue";
     import Accordeon from "./components/misc/Accordeon.vue";
-    import InputAPIKey from "./components/openai/InputAPIKey.vue";
     import ls from "local-storage";
-    import { openAIStream } from "./helpers/openAIStream";
     import InputText, { InputTextSuggestion } from "./components/misc/InputText.vue";
     import { languageCodes } from "./helpers";
+    import APIKey from '@/components/partials/APIKey.vue'
 
     export default defineComponent({
         components: {
+            APIKey,
             InputText,
             Tabs,
             InputTextarea,
             OpenAITextSettings,
             InputFile,
             Accordeon,
-            InputAPIKey,
             Error,
         },
         data() {
@@ -168,7 +141,6 @@
                 apiKey: process.env.OPENAI_API_KEY || ls("openAIKey") || "",
                 api: new SimpleGPT({ key: process.env.OPENAI_API_KEY || "" }),
                 apiKeyNeeded: false,
-                apiKeyVisible: false,
             };
         },
         computed: {
@@ -205,9 +177,6 @@
                 setTimeout(() => {
                     this.savedSettings = false;
                 }, 5000);
-            },
-            showApiKeyInput() {
-                this.apiKeyVisible = !this.apiKeyVisible;
             },
             clearResult() {
                 this.result = "";
@@ -303,11 +272,7 @@
             },
         },
         created() {
-            if (!this.apiKey) {
-                this.apiKeyVisible = true;
-            } else {
-                this.api.setApiKey(this.apiKey);
-            }
+            this.apiKey && this.api.setApiKey(this.apiKey);
         },
         mounted() {
             const savedSettings = localStorage.getItem("settings");
