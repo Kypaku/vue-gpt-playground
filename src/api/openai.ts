@@ -1,3 +1,4 @@
+        import {startsWith, replace} from 'lodash'
 
 import { Configuration, OpenAIApi, CreateCompletionRequest, CreateChatCompletionRequest, CreateImageRequestSizeEnum } from "openai";
 import https from "https";
@@ -34,10 +35,17 @@ export default class SimpleGPT {
         this.setApiKey(key);
     }
 
-    async transcribe(options: any) {
+    async transcribe(formData: FormData) {
+        const requestOptions = {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${this._key}`,
+            },
+            body: formData,
+        };
         const response = await fetch(
             "https://api.openai.com/v1/audio/transcriptions",
-            options
+            requestOptions
         ).then((response) => {
             if (response.ok) {
                 return response?.json?.();
@@ -71,6 +79,11 @@ export default class SimpleGPT {
                 res.on("data", (chunk) => {
                     try {
                         let delta = "";
+                        if (chunk?.toString().match(/^\{\n\s+\"error\"\:/)) {
+                            console.error("getStream error:", chunk.toString());
+                            reject(JSON.parse(chunk.toString().trim()));
+                            return
+                        }
                         const lines = chunk?.toString()?.split("\n") || [];
                         const line = lines.filter((line: string) => line.trim()).at(-1);
                         const data = line.toString().replace("data:", "").replace("[DONE]", "").replace("data: [DONE]", "").trim();
@@ -109,11 +122,6 @@ export default class SimpleGPT {
             req.write(body);
 
             req.end();
-        // const response = await this._openai?.createChatCompletion({
-        //     stream: true,
-        // }, { responseType: 'stream' });
-        // (response as any)?.data.on('data', console.log)
-        // return response
         });
     }
 

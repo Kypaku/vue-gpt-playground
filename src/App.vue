@@ -89,7 +89,7 @@
     import ls from "local-storage";
     import InputText, { InputTextSuggestion } from "./components/misc/InputText.vue";
     import { languageCodes } from "./helpers";
-    import APIKey from '@/components/partials/APIKey.vue'
+    import APIKey from "@/components/partials/APIKey.vue";
 
     export default defineComponent({
         components: {
@@ -199,14 +199,8 @@
                         formData.append("file", blob, "test.webm");
                         formData.append("model", "whisper-1");
                         formData.append("language", this.whisperLanguage);
-                        const requestOptions = {
-                            method: "POST",
-                            headers: {
-                                Authorization: `Bearer ${this.apiKey}`,
-                            },
-                            body: formData,
-                        };
-                        const text = await this.api.transcribe(requestOptions);
+
+                        const text = await this.api.transcribe(formData);
                         this.result = text || "";
                         setTimeout(() => {
                             (this.$refs?.result as any)?.scrollIntoView?.();
@@ -262,6 +256,9 @@
                         }
                     } catch (e: any) {
                         console.error("App error: " + e);
+                        if (e.error) {
+                            this.error = e.error.message || `Error code: ${e.error.code}`
+                        }
                         if (e?.response?.data?.error?.message) {
                             this.error = e?.response.data.error.message;
                         }
