@@ -241,7 +241,7 @@
                             this.result = res || "";
                             this.scrollToResult();
                         } else {
-                            const fData = (raw: string, json: any, delta: string) => {
+                            const fData = (delta: string, json: any, raw: string) => {
                                 try {
                                     this.result += delta || "";
                                     this.scrollToResult();

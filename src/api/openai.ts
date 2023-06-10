@@ -85,21 +85,22 @@ export default class SimpleGPT {
                             return
                         }
                         const lines = chunk?.toString()?.split("\n") || [];
-                        const line = lines.filter((line: string) => line.trim()).at(-1);
+                        const filtredLines = lines.filter((line: string) => line.trim()) 
+                        const line = filtredLines[filtredLines.length - 1]
                         const data = line.toString().replace("data:", "").replace("[DONE]", "").replace("data: [DONE]", "").trim();
                         if (data) {
                             const json = JSON.parse(data);
                             json.choices.forEach((choice: any) => {
                                 delta += choice.text || choice.message?.content || choice.delta?.content || "";
                             });
-                            fData(chunk.toString(), json, delta);
+                            fData(delta, json, chunk.toString());
                         }
                     } catch (e) {
                         console.error("getStream handle chunk error:", e, chunk.toString());
                     }
                 });
                 res.on("end", () => {
-                    fEnd();
+                    fEnd?.();
                     resolve();
                 });
             });
