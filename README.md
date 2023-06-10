@@ -1,7 +1,16 @@
 # vue-gpt-example
 To get an API KEY you need to register new OPEN AI account and then visit https://platform.openai.com/account/api-keys
 
-[Demo](http://kypaku.ru/pages/vue-gpt-playground/)
+### [Demo](http://kypaku.ru/pages/vue-gpt-playground/)
+
+## Features:
+Streams
+
+Chat/Completeions
+
+DALL-E
+
+Transcribing audio
 
 ## Clone:
 ```
