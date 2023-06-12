@@ -1,7 +1,11 @@
-        import {startsWith, replace} from 'lodash'
-
+import { startsWith, replace, set } from "lodash";
 import { Configuration, OpenAIApi, CreateCompletionRequest, CreateChatCompletionRequest, CreateImageRequestSizeEnum } from "openai";
 import https from "https";
+// const request = require('request')
+import request from "request";
+import AbortController from "abort-controller";
+
+const abortController = new AbortController();
 class CustomFormData extends FormData {
     getHeaders() {
         return {};
@@ -12,6 +16,7 @@ export default class SimpleGPT {
     protected _key: string
     protected _configuration: Configuration | null
     protected _openai: OpenAIApi | null
+    protected req: any
 
     public get chatModels(): string[] {
         return ["gpt-3.5-turbo", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314"];
@@ -65,45 +70,8 @@ export default class SimpleGPT {
             const messages = opts?.messages || [{ role: "user", content: _prompt as string }];
 
             const endpoint = isChatModel ? "/v1/chat/completions" : "/v1/completions";
+            const signal = abortController.signal;
 
-            const req = https.request({
-                hostname: "api.openai.com",
-                port: 443,
-                path: endpoint,
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + this._key
-                }
-            }, function(res) {
-                res.on("data", (chunk) => {
-                    try {
-                        let delta = "";
-                        if (chunk?.toString().match(/^\{\n\s+\"error\"\:/)) {
-                            console.error("getStream error:", chunk.toString());
-                            reject(JSON.parse(chunk.toString().trim()));
-                            return
-                        }
-                        const lines = chunk?.toString()?.split("\n") || [];
-                        const filtredLines = lines.filter((line: string) => line.trim()) 
-                        const line = filtredLines[filtredLines.length - 1]
-                        const data = line.toString().replace("data:", "").replace("[DONE]", "").replace("data: [DONE]", "").trim();
-                        if (data) {
-                            const json = JSON.parse(data);
-                            json.choices.forEach((choice: any) => {
-                                delta += choice.text || choice.message?.content || choice.delta?.content || "";
-                            });
-                            fData(delta, json, chunk.toString());
-                        }
-                    } catch (e) {
-                        console.error("getStream handle chunk error:", e, chunk.toString());
-                    }
-                });
-                res.on("end", () => {
-                    fEnd?.();
-                    resolve();
-                });
-            });
             const body = JSON.stringify({
                 model,
                 prompt: isChatModel ? undefined : _prompt,
@@ -116,14 +84,64 @@ export default class SimpleGPT {
                 stream: opts?.stream || true,
             });
 
-            req.on("error", (e) => {
+            this.req = request({
+                url: "https://api.openai.com" + endpoint,
+                // hostname: "api.openai.com",
+                // port: 443,
+                // path: endpoint,
+                // signal: signal as any,
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + this._key
+                },
+                body: body,
+            });
+
+            this.req.on("error", (e: any) => {
                 console.error("problem with request:" + e.message);
             });
 
-            req.write(body);
+            // req.write(body);
+            this.req.on("data", (chunk: any) => {
+                try {
+                    let delta = "";
+                    if (chunk?.toString().match(/^\{\n\s+\"error\"\:/)) {
+                        console.error("getStream error:", chunk.toString());
+                        reject(JSON.parse(chunk.toString().trim()));
+                        return;
+                    }
+                    const lines = chunk?.toString()?.split("\n") || [];
+                    const filtredLines = lines.filter((line: string) => line.trim());
+                    const line = filtredLines[filtredLines.length - 1];
+                    const data = line.toString().replace("data:", "").replace("[DONE]", "").replace("data: [DONE]", "").trim();
+                    if (data) {
+                        const json = JSON.parse(data);
+                        json.choices.forEach((choice: any) => {
+                            delta += choice.text || choice.message?.content || choice.delta?.content || "";
+                        });
+                        fData(delta, json, chunk.toString());
+                    }
+                } catch (e) {
+                    console.error("getStream handle chunk error:", e, chunk.toString());
+                }
+            })
 
-            req.end();
+
+            this.req.on("end", () => {
+                fEnd?.();
+                resolve();
+            });
+
+            this.req.on("abort", () => {
+                fEnd?.();
+                resolve();
+            })
         });
+    }
+
+    abortStream() {
+        this.req.abort();
     }
 
     async get(prompt: string, opts?: Partial<CreateCompletionRequest & CreateChatCompletionRequest>): Promise<null | string[]> {

@@ -52,11 +52,21 @@
                 :rows="10"
             />
             <button
-                :disabled="tab !== 'audio' ? isLoading || !prompt : isTranscribing || !audioFile"
-                @click="tab === 'audio' ? runTranscribe(audioFile) : run()"
+                v-if="tab === 'audio'"
+                :disabled="isTranscribing || !audioFile"
+                @click="runTranscribe(audioFile)"
                 class="mt-2 bg-gray-300 run-btn px-8 py-2 text-white rounded"
             >
-                <b>{{ isLoading ? "Loading..." : "Run" }}</b>
+                <b>{{ isLoading ?  "Loading..." : "Run" }}</b>
+
+            </button>
+            <button
+                v-else
+                :disabled="tab === 'image' ? isLoading : (!textOpts.streams && isLoading)"
+                @click="run()"
+                class="mt-2 bg-gray-300 run-btn px-8 py-2 text-white rounded"
+            >
+                <b>{{ isLoading ? (tab === 'image' || !textOpts.streams ? "Loading..." : 'Stop') : "Run" }}</b>
 
             </button>
             <div class="image-wrapper" v-if="tab === 'image' && result" ref="result">
@@ -257,7 +267,7 @@
                     } catch (e: any) {
                         console.error("App error: " + e);
                         if (e.error) {
-                            this.error = e.error.message || `Error code: ${e.error.code}`
+                            this.error = e.error.message || `Error code: ${e.error.code}`;
                         }
                         if (e?.response?.data?.error?.message) {
                             this.error = e?.response.data.error.message;
@@ -265,6 +275,8 @@
                     } finally {
                         this.isLoading = false;
                     }
+                } else {
+                    this.api.abortStream();
                 }
             },
         },
