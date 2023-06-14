@@ -10,7 +10,7 @@
   "dependencies": {
     "abort-controller": "^3.0.0",
     "autoprefixer": "^9.8.8",
-    "core-js": "^3.6.5",
+    "core-js": "^3.30.2",
     "eventsource-parser": "^1.0.0",
     "local-storage": "^2.0.0",
     "openai": "^3.2.1",
