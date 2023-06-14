@@ -11,11 +11,12 @@
                     <a target="_blank" :href="currentGuide">OpenAI API Guide</a>
                 </div>
             </div>
-            <APIKey v-model:value="apiKey" @update:value="(val) => (api.setApiKey(val), (apiKeyNeeded = false))"/>
+            <APIKey v-model:value="apiKey" @update:value="(val) => updateApiKey(val)"/>
             <Accordeon title="Settings" v-model:value="settings" class="mt-3 api-key" >
                 <OpenAITextSettings
                     v-if="settings"
                     v-model:value="textOpts"
+                    :models="models"
                 >
                 </OpenAITextSettings>
                 <button v-if="settings" class="save-button"  @click="saveSettings">
@@ -114,6 +115,7 @@
         },
         data() {
             return {
+                models: [] as string[],
                 audioFile: null,
                 savedSettings: false,
                 whisperLanguage: "",
@@ -169,6 +171,13 @@
             },
         },
         methods: {
+            async updateApiKey(val: string) {
+                // (api.setApiKey(val), (apiKeyNeeded = false))
+                this.apiKey = val;
+                this.api.setApiKey(val);
+                this.models = (await this.api.getModels()) || [];
+            },
+
             stopRunning() {
                 if (this.apiKeyNeeded) {
                     alert("Enter your API KEY");
@@ -277,11 +286,13 @@
                     }
                 } else {
                     this.api.abortStream();
+                    this.isLoading = false;
                 }
             },
         },
-        created() {
+        async created() {
             this.apiKey && this.api.setApiKey(this.apiKey);
+            this.models = (await this.api.getModels()) || [];
         },
         mounted() {
             const savedSettings = localStorage.getItem("settings");

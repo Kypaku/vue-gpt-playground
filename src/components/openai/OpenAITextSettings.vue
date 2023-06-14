@@ -7,7 +7,8 @@
                 name="model"
                 :value="value?.model"
                 label="Model"
-                :placeholder="'gpt-3.5-turbo-0301'"
+                :placeholder="'gpt-3.5-turbo-0613'"
+                :suggestions="modelsSuggestions"
                 @update:value="
                     (newVal) =>
                         $emit('update:value', {
@@ -70,10 +71,14 @@
     import { defineComponent, PropType } from "vue";
     import { CreateCompletionRequest } from "openai";
     import InputNumber from "../misc/InputNumber.vue";
-    import InputText from "@/components/misc/InputText.vue";
+    import InputText, { InputTextSuggestion } from "@/components/misc/InputText.vue";
 
     export default defineComponent({
         props: {
+            models: {
+                type: Array as PropType<string[]>,
+                default: () => []
+            },
             value: Object as PropType<Partial<CreateCompletionRequest>>,
         },
         components: {
@@ -83,7 +88,11 @@
         data() {
             return {};
         },
-        computed: {},
+        computed: {
+            modelsSuggestions(): InputTextSuggestion[] {
+                return [...this.models.map((el) => ({name: el, value: el}))].reverse();
+            },
+        },
         methods: {
             show() {
                 console.log(this.value?.max_tokens);

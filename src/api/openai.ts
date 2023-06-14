@@ -1,5 +1,5 @@
 import { startsWith, replace, set } from "lodash";
-import { Configuration, OpenAIApi, CreateCompletionRequest, CreateChatCompletionRequest, CreateImageRequestSizeEnum } from "openai";
+import { Configuration, OpenAIApi, CreateCompletionRequest, CreateChatCompletionRequest, CreateImageRequestSizeEnum, Model } from "openai";
 import https from "https";
 // const request = require('request')
 import request from "request";
@@ -12,6 +12,12 @@ class CustomFormData extends FormData {
     }
 }
 
+export const maxTokensModels = {
+    "gpt-3.5-turbo": 4096,
+    "gpt-4": 8192,
+    "gpt-3.5-turbo-16k": 16384
+}
+
 export default class SimpleGPT {
     protected _key: string
     protected _configuration: Configuration | null
@@ -19,14 +25,14 @@ export default class SimpleGPT {
     protected req: any
 
     public get chatModels(): string[] {
-        return ["gpt-3.5-turbo", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0314"];
+        return ["gpt-3.5-turbo", "gpt-4"];
     }
 
     public get defaultOptsGPT(): Partial<CreateCompletionRequest> {
         return {
-            model: "gpt-3.5-turbo-0301",
+            model: "gpt-3.5-turbo-0613",
             temperature: 0,
-            max_tokens: 60,
+            max_tokens: 200,
             top_p: 1,
             frequency_penalty: 0.5,
             presence_penalty: 0
@@ -65,7 +71,7 @@ export default class SimpleGPT {
         return new Promise((resolve, reject) => {
             const model = opts?.model || this.defaultOptsGPT.model || "";
 
-            const isChatModel = this.chatModels.indexOf(model) >= 0;
+            const isChatModel = this.chatModels.find((chatModel) => model.includes(chatModel))
             const _prompt = (prompt || opts?.prompt);
             const messages = opts?.messages || [{ role: "user", content: _prompt as string }];
 
@@ -141,13 +147,13 @@ export default class SimpleGPT {
     }
 
     abortStream() {
-        this.req.abort();
+        const res = this.req.abort();
     }
 
     async get(prompt: string, opts?: Partial<CreateCompletionRequest & CreateChatCompletionRequest>): Promise<null | string[]> {
         if (!this._openai) return null;
         const model = opts?.model || this.defaultOptsGPT.model || "";
-        const isChatModel = this.chatModels.indexOf(model) >= 0;
+        const isChatModel = this.chatModels.find((chatModel) => model.includes(chatModel))
         const _prompt = (prompt || opts?.prompt);
         const messages = opts?.messages || [{ role: "user", content: _prompt as string }];
         const response = await this._openai[isChatModel ? "createChatCompletion" : "createCompletion"]({
@@ -161,6 +167,20 @@ export default class SimpleGPT {
             presence_penalty: opts?.presence_penalty || this.defaultOptsGPT.presence_penalty,
         });
         return (response?.data?.choices as any)?.map((choice: any) => choice.text || choice.message?.content).filter(Boolean) as string[];
+    }
+
+    async getCompletions(prompt: string, opts?: Partial<CreateCompletionRequest>): Promise<null | string[]> {
+        if (!this._openai) return null;
+        const response = await this._openai.createCompletion({
+            model: opts?.model || "gpt-3.5-turbo-0613",
+            prompt: prompt || opts?.prompt,
+            temperature: opts?.temperature || 0,
+            max_tokens: opts?.max_tokens || 256,
+            top_p: opts?.top_p || 1,
+            frequency_penalty: opts?.frequency_penalty || 0,
+            presence_penalty: opts?.presence_penalty || 0,
+        });
+        return response.data.choices.map((choice) => choice.text).filter(Boolean) as string[];
     }
 
     async getFirst(prompt: string, opts?: Partial<CreateCompletionRequest & CreateChatCompletionRequest>): Promise<string | undefined> {
@@ -204,5 +224,11 @@ export default class SimpleGPT {
             apiKey: this._key,
         });
         this._openai = new OpenAIApi(this._configuration);
+    }
+
+    async getModels(): Promise<null | string[]> {
+        if (!this._openai) return null;
+        const response = await this._openai.listModels();
+        return response.data.data.map((datum) => datum.id) || null;
     }
 }
