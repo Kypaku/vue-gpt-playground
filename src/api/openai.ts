@@ -16,7 +16,7 @@ export const maxTokensModels = {
     "gpt-3.5-turbo": 4096,
     "gpt-4": 8192,
     "gpt-3.5-turbo-16k": 16384
-}
+};
 
 export default class SimpleGPT {
     protected _key: string
@@ -71,24 +71,25 @@ export default class SimpleGPT {
         return new Promise((resolve, reject) => {
             const model = opts?.model || this.defaultOptsGPT.model || "";
 
-            const isChatModel = this.chatModels.find((chatModel) => model.includes(chatModel))
+            const isChatModel = this.chatModels.find((chatModel) => model.includes(chatModel));
             const _prompt = (prompt || opts?.prompt);
             const messages = opts?.messages || [{ role: "user", content: _prompt as string }];
 
             const endpoint = isChatModel ? "/v1/chat/completions" : "/v1/completions";
             const signal = abortController.signal;
 
-            const body = JSON.stringify({
+            const bodyRaw = {
                 model,
                 prompt: isChatModel ? undefined : _prompt,
-                messages: messages,
+                messages: isChatModel ? messages : undefined,
                 temperature: opts?.temperature || this.defaultOptsGPT.temperature,
                 max_tokens: opts?.max_tokens || this.defaultOptsGPT.max_tokens || 0,
                 top_p: opts?.top_p || 1,
                 frequency_penalty: opts?.frequency_penalty || this.defaultOptsGPT.frequency_penalty,
                 presence_penalty: opts?.presence_penalty || this.defaultOptsGPT.presence_penalty,
                 stream: opts?.stream || true,
-            });
+            };
+            const body = JSON.stringify(bodyRaw);
 
             this.req = request({
                 url: "https://api.openai.com" + endpoint,
@@ -131,8 +132,7 @@ export default class SimpleGPT {
                 } catch (e) {
                     console.error("getStream handle chunk error:", e, chunk.toString());
                 }
-            })
-
+            });
 
             this.req.on("end", () => {
                 fEnd?.();
@@ -142,7 +142,7 @@ export default class SimpleGPT {
             this.req.on("abort", () => {
                 fEnd?.();
                 resolve();
-            })
+            });
         });
     }
 
@@ -153,19 +153,20 @@ export default class SimpleGPT {
     async get(prompt: string, opts?: Partial<CreateCompletionRequest & CreateChatCompletionRequest>): Promise<null | string[]> {
         if (!this._openai) return null;
         const model = opts?.model || this.defaultOptsGPT.model || "";
-        const isChatModel = this.chatModels.find((chatModel) => model.includes(chatModel))
+        const isChatModel = this.chatModels.find((chatModel) => model.includes(chatModel));
         const _prompt = (prompt || opts?.prompt);
         const messages = opts?.messages || [{ role: "user", content: _prompt as string }];
-        const response = await this._openai[isChatModel ? "createChatCompletion" : "createCompletion"]({
+        const handler = this._openai[isChatModel ? "createChatCompletion" : "createCompletion"]
+        const response = await handler({
             model,
             prompt: isChatModel ? undefined : _prompt,
-            messages: messages,
+            messages: isChatModel ? messages : undefined,
             temperature: opts?.temperature || this.defaultOptsGPT.temperature,
             max_tokens: opts?.max_tokens || this.defaultOptsGPT.max_tokens || 0,
             top_p: opts?.top_p || 1,
             frequency_penalty: opts?.frequency_penalty || this.defaultOptsGPT.frequency_penalty,
             presence_penalty: opts?.presence_penalty || this.defaultOptsGPT.presence_penalty,
-        });
+        } as any);
         return (response?.data?.choices as any)?.map((choice: any) => choice.text || choice.message?.content).filter(Boolean) as string[];
     }
 
