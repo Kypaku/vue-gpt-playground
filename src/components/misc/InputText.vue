@@ -32,7 +32,8 @@
 </template>
 
 <script lang='ts'>
-    import { defineComponent, PropType } from "vue";
+    import { uniqBy } from "lodash";
+import { defineComponent, PropType } from "vue";
 
     function localeIncludes(str1: string, str2: string) {
         return (str1.toLocaleLowerCase && str1.toLocaleLowerCase()).includes(str2.toLocaleLowerCase && str2.toLocaleLowerCase());
@@ -72,7 +73,7 @@
                 if (!this.suggestions) return [];
                 const byStart = this.suggestions.filter((el) => this.value ? localeStart(el.name, this.value) : true);
                 const byInclude = this.suggestions.filter((el) => this.value ? localeIncludes(el.name, this.value) : true);
-                return [...byStart, ...byInclude];
+                return uniqBy([...byStart, ...byInclude], "value");
             },
         },
         methods: {

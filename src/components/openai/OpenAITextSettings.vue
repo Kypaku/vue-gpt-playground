@@ -72,6 +72,7 @@
     import { CreateCompletionRequest } from "openai";
     import InputNumber from "../misc/InputNumber.vue";
     import InputText, { InputTextSuggestion } from "@/components/misc/InputText.vue";
+    import { uniq } from "lodash";
 
     export default defineComponent({
         props: {
@@ -90,7 +91,7 @@
         },
         computed: {
             modelsSuggestions(): InputTextSuggestion[] {
-                return [...this.models.map((el) => ({name: el, value: el}))].reverse();
+                return [...uniq(this.models).map((el) => ({ name: el, value: el }))].reverse();
             },
         },
         methods: {
