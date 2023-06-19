@@ -48,6 +48,11 @@
                         })
                 "
             />
+            <ToggleSwitch class="mt-2"  :value="value?.stream ?? true" label="Stream" @update:value="(newVal) =>
+                $emit('update:value', {
+                    ...value,
+                    ['stream']: newVal,
+                })" />
             <!-- <InputNumber
                 class="mt-1"
                 name="n"
@@ -73,6 +78,7 @@
     import InputNumber from "../misc/InputNumber.vue";
     import InputText, { InputTextSuggestion } from "@/components/misc/InputText.vue";
     import { uniq } from "lodash";
+    import ToggleSwitch from "../misc/ToggleSwitch.vue";
 
     export default defineComponent({
         props: {
@@ -85,6 +91,7 @@
         components: {
             InputText,
             InputNumber,
+            ToggleSwitch
         },
         data() {
             return {};

@@ -156,8 +156,7 @@ export default class SimpleGPT {
         const isChatModel = this.chatModels.find((chatModel) => model.includes(chatModel));
         const _prompt = (prompt || opts?.prompt);
         const messages = opts?.messages || [{ role: "user", content: _prompt as string }];
-        const handler = this._openai[isChatModel ? "createChatCompletion" : "createCompletion"]
-        const response = await handler({
+        const response = await this._openai[isChatModel ? "createChatCompletion" : "createCompletion"]({
             model,
             prompt: isChatModel ? undefined : _prompt,
             messages: isChatModel ? messages : undefined,

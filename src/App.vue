@@ -8,7 +8,13 @@
             <div class="description container mx-auto mt-8 pr-2 text-xl">
                 An example project based on Vue CLI to demonstrate basic OpenAI GPT possibilities.<br/> Create your own Chat GPT!
                 <div>
-                    <a target="_blank" :href="currentGuide">OpenAI API Guide</a>
+                    <a class="text-base"  target="_blank" :href="currentGuide">OpenAI API Guide</a>
+                </div>
+                <div>
+                    <a class="text-base" target="_blank" :href="'https://github.com/Kypaku/vue-gpt-playground'">GitHub Project</a>
+                </div>
+                <div>
+                    <a class="text-base" target="_blank" :href="'https://www.npmjs.com/package/gpt-simple-api-ts'">API</a>
                 </div>
             </div>
             <APIKey v-model:value="apiKey" @update:value="(val) => updateApiKey(val)"/>
@@ -63,11 +69,11 @@
             </button>
             <button
                 v-else
-                :disabled="tab === 'image' ? isLoading : (!textOpts.streams && isLoading)"
+                :disabled="tab === 'image' ? isLoading : (!textOpts.stream && isLoading)"
                 @click="run()"
                 class="mt-2 bg-gray-300 run-btn px-8 py-2 text-white rounded"
             >
-                <b>{{ isLoading ? (tab === 'image' || !textOpts.streams ? "Loading..." : 'Stop') : "Run" }}</b>
+                <b>{{ isLoading ? (tab === 'image' || !textOpts.stream ? "Loading..." : 'Stop') : "Run" }}</b>
 
             </button>
             <div class="image-wrapper" v-if="tab === 'image' && result" ref="result">
@@ -131,7 +137,7 @@
                     max_tokens: 200,
                     n: 1,
                     model: "gpt-3.5-turbo-0301",
-                    streams: true,
+                    stream: true,
                 },
                 imageOpts: {
                     n: 1,
@@ -255,7 +261,7 @@
                             res = await this.api.getImages(this.prompt, this.imageOpts.n);
                             this.result = res || "";
                             this.scrollToResult();
-                        } else if (!this.textOpts.streams) {
+                        } else if (!this.textOpts.stream) {
                             res = await this.api.get(this.prompt, this.textOpts);
                             this.result = res || "";
                             this.scrollToResult();
@@ -341,7 +347,7 @@
         max-width: 900px;
     }
     a {
-        @apply underline text-blue-600 hover:text-blue-800;
+        @apply underline text-blue-500 hover:text-blue-800;
     }
     .app {
         background: linear-gradient(to bottom, rgb(255 255 255), rgb(206 255 228));
