@@ -146,11 +146,12 @@ export default class SimpleGPT {
                         try {
                             const responseChunk = JSON.parse(chunk.toString().slice("data: ".length));
 
-                            fData(responseChunk.choices?.[0]?.delta?.content, responseChunk, chunk);
+                            fData(responseChunk.choices?.[0]?.delta?.content || '', responseChunk, chunk);
                         } catch (e) {
                             throw new Error(`Unexpected message: ${chunk}`);
                         }
                     }
+                    resolve();
                 }
             });
         });
