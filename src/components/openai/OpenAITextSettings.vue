@@ -1,7 +1,10 @@
 <template>
     <div class="query-settings">
-        <b>GPT settings</b>
-        <div class="settingsWrapper flex-col">
+        <div class="flex-center-between">
+            <b>GPT settings</b>
+            <button class="underline text-sm"  @click="editJson = !editJson"> {{ editJson ? 'Hide' : 'Edit' }} json </button>
+        </div>
+        <div class="settingsWrapper flex-col" v-if="!editJson">
             <InputText
                 class="mt-1"
                 name="model"
@@ -69,6 +72,9 @@
                 "
             /> -->
         </div>
+        <div v-else>
+            <textarea v-model="json" @input="ev => $emit('update:value', JSON.parse(ev?.target?.value))" rows="15" class="w-full"></textarea>
+        </div>
     </div>
 </template>
 
@@ -94,7 +100,10 @@
             ToggleSwitch
         },
         data() {
-            return {};
+            return {
+                json: "",
+                editJson: false,
+            };
         },
         computed: {
             modelsSuggestions(): InputTextSuggestion[] {
@@ -106,7 +115,17 @@
                 console.log(this.value?.max_tokens);
             },
         },
-    // mounted() {},
+        // mounted() {},
+
+        watch: {
+            value: {
+                handler(newVal) {
+                    this.json = JSON.stringify(newVal, null, 2);
+                },
+                deep: true,
+                immediate: true,
+            },
+        },
     });
 </script>
 
@@ -117,5 +136,11 @@
         max-width: 260px;
         display: flex;
     }
+}
+
+.flex-center-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 </style>

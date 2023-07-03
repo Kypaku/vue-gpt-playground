@@ -14,7 +14,7 @@
     "eventsource-parser": "^1.0.0",
     "gpt-simple-api-ts": "^1.0.35",
     "local-storage": "^2.0.0",
-    "openai": "^3.2.1",
+    "openai": "^3.3.0",
     "postcss": "^8",
     "request": "^2.88.2",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.17",

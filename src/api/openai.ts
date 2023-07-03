@@ -23,6 +23,7 @@ export default class SimpleGPT {
     protected _configuration: Configuration | null
     protected _openai: OpenAIApi | null
     protected req: any
+    protected reader: any
 
     public get chatModels(): string[] {
         return ["gpt-3.5-turbo", "gpt-4"];
@@ -67,7 +68,7 @@ export default class SimpleGPT {
         return response.text;
     }
 
-    async getStream(prompt: string, fData: (raw: any, json: {[key: string]: any}, delta: string) => any, fEnd: any, opts?: Partial<CreateCompletionRequest & CreateChatCompletionRequest>): Promise<void> {
+    async getStream(prompt: string, fData: (delta: string, json: {[key: string]: any}, raw: any) => any, fEnd: any, opts?: Partial<CreateCompletionRequest & CreateChatCompletionRequest>): Promise<void> {
         return new Promise((resolve, reject) => {
             const model = opts?.model || this.defaultOptsGPT.model || "";
 
@@ -88,66 +89,75 @@ export default class SimpleGPT {
                 frequency_penalty: opts?.frequency_penalty || this.defaultOptsGPT.frequency_penalty,
                 presence_penalty: opts?.presence_penalty || this.defaultOptsGPT.presence_penalty,
                 stream: opts?.stream || true,
+                logit_bias: opts?.logit_bias || {},
+                function_call: opts?.function_call || undefined,
+                functions: opts?.functions || undefined,
             };
             const body = JSON.stringify(bodyRaw);
 
-            this.req = request({
-                url: "https://api.openai.com" + endpoint,
-                // hostname: "api.openai.com",
-                // port: 443,
-                // path: endpoint,
-                // signal: signal as any,
+            fetch("https://api.openai.com" + endpoint, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: "Bearer " + this._key
                 },
                 body: body,
-            });
+            }).then(async (response) => {
+                this.reader = response.body?.pipeThrough(new TextDecoderStream()).getReader();
 
-            this.req.on("error", (e: any) => {
-                console.error("problem with request:" + e.message);
-            });
+                const choices = [];
 
-            // req.write(body);
-            this.req.on("data", (chunk: any) => {
-                try {
-                    let delta = "";
-                    if (chunk?.toString().match(/^\{\n\s+\"error\"\:/)) {
-                        console.error("getStream error:", chunk.toString());
-                        reject(JSON.parse(chunk.toString().trim()));
-                        return;
+                const cancelled = false;
+                while (true) {
+                    if (!this.reader) break;
+                    const { value, done } = await this.reader.read();
+
+                    if (done) {
+                        break;
                     }
-                    const lines = chunk?.toString()?.split("\n") || [];
-                    const filtredLines = lines.filter((line: string) => line.trim());
-                    const line = filtredLines[filtredLines.length - 1];
-                    const data = line.toString().replace("data:", "").replace("[DONE]", "").replace("data: [DONE]", "").trim();
-                    if (data) {
-                        const json = JSON.parse(data);
-                        json.choices.forEach((choice: any) => {
-                            delta += choice.text || choice.message?.content || choice.delta?.content || "";
-                        });
-                        fData(delta, json, chunk.toString());
+
+                    if (value.startsWith("{")) {
+                        await this.reader.cancel();
+
+                        // As far as I can tell, if the response is an object, then it is an unrecoverable error.
+                        throw new Error(value);
                     }
-                } catch (e) {
-                    console.error("getStream handle chunk error:", e, chunk.toString());
+                    const chunks = value.split("\n").map((chunk: any) => chunk.trim()).filter(Boolean);
+
+                    for (const chunk of chunks) {
+                        if (done) {
+                            break;
+                        }
+
+                        if (chunk === "") {
+                            continue;
+                        }
+
+                        if (chunk === "data: [DONE]") {
+                            await this.reader.cancel();
+
+                            break;
+                        }
+
+                        if (!chunk.startsWith("data: ")) {
+                            throw new Error(`Unexpected message: ${chunk}`);
+                        }
+
+                        try {
+                            const responseChunk = JSON.parse(chunk.toString().slice("data: ".length));
+
+                            fData(responseChunk.choices?.[0]?.delta?.content, responseChunk, chunk);
+                        } catch (e) {
+                            throw new Error(`Unexpected message: ${chunk}`);
+                        }
+                    }
                 }
-            });
-
-            this.req.on("end", () => {
-                fEnd?.();
-                resolve();
-            });
-
-            this.req.on("abort", () => {
-                fEnd?.();
-                resolve();
             });
         });
     }
 
     abortStream() {
-        const res = this.req.abort();
+        this.reader.cancel();
     }
 
     async get(prompt: string, opts?: Partial<CreateCompletionRequest & CreateChatCompletionRequest>): Promise<null | string[]> {

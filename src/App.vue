@@ -58,6 +58,10 @@
                 class="w-full rounded-lg mt-8"
                 :rows="10"
             />
+            <div class="tokens-left text-xs">
+                <span>Tokens count (approximate): </span>
+                <span>{{ tokensCount }}</span>
+            </div>
             <button
                 v-if="tab === 'audio'"
                 :disabled="isTranscribing || !audioFile"
@@ -162,6 +166,10 @@
             };
         },
         computed: {
+            tokensCount(): number {
+                return this.prompt.length / 4
+            },
+
             langCodes(): InputTextSuggestion[] {
                 return languageCodes.map((code) => ({
                     name: code,
