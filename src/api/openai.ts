@@ -1,5 +1,5 @@
 import { startsWith, replace, set } from "lodash";
-import { Configuration, OpenAIApi, CreateCompletionRequest, CreateChatCompletionRequest, CreateImageRequestSizeEnum, Model } from "openai";
+import { Configuration, OpenAIApi, CreateCompletionRequest, CreateChatCompletionRequest, CreateImageRequestSizeEnum, Model, CreateEmbeddingRequest } from "openai";
 import https from "https";
 // const request = require('request')
 import request from "request";
@@ -29,6 +29,7 @@ export default class SimpleGPT {
         return ["gpt-3.5-turbo", "gpt-4"];
     }
 
+
     public get defaultOptsGPT(): Partial<CreateCompletionRequest> {
         return {
             model: "gpt-3.5-turbo-0613",
@@ -45,6 +46,15 @@ export default class SimpleGPT {
         this._configuration = null;
         this._openai = null;
         this.setApiKey(key);
+    }
+
+    async getEmbedding(options?: Partial<CreateEmbeddingRequest>) {
+        const request: CreateEmbeddingRequest = {
+            model: options?.model || "text-embedding-ada-002",
+            user: options?.user || "",
+            input: options?.input || "",
+        }
+        this._openai?.createEmbedding(request, {})
     }
 
     async transcribe(formData: FormData) {
@@ -151,8 +161,8 @@ export default class SimpleGPT {
                             throw new Error(`Unexpected message: ${chunk}`);
                         }
                     }
-                    resolve();
                 }
+                resolve();
             });
         });
     }

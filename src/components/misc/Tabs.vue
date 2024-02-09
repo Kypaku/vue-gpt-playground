@@ -7,7 +7,7 @@
             }"
             v-for="(tab, i) in tabs"
             :key="i"
-            @click="$emit('update:value', tab.value)"
+            @click="handleChangeTab(tab.value)"
         >
             <span class="text-lg" >{{ tab.label }}</span>
         </li>
@@ -29,12 +29,33 @@
         },
         components: {},
         data() {
-            return {};
+            return {
+                hash: window.location.hash,
+            };
         },
         computed: {},
-        methods: {},
+        methods: {
+            handleChangeTab(value: string) {
+                this.$emit("update:value", value);
+                window.location.hash = value;
+            },
+        },
 
-        watch: {},
+        watch: {
+            // hash: {
+            //     handler(newVal: string) {
+            //         const hash = newVal;
+            //         this.$emit("update:value", hash?.replace("#", "") || "");
+            //     },
+            //     immediate: true,
+            //     deep: true,
+            // }
+        },
+
+        created () {
+            const hash = window.location.hash;
+            this.$emit("update:value", hash?.replace("#", "") || "");
+        },
     });
 </script>
 

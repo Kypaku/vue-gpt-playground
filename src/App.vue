@@ -58,7 +58,7 @@
                 class="w-full rounded-lg mt-8"
                 :rows="10"
             />
-            <div class="tokens-left text-xs">
+            <div class="tokens-left text-xs" v-if="!tab">
                 <span>Tokens count (approximate): </span>
                 <span>{{ tokensCount }}</span>
             </div>
@@ -154,6 +154,7 @@
                     // { label: "Code", value: "code" },
                     { label: "Image", value: "image" },
                     { label: "Audio", value: "audio" },
+                    { label: "Embeddings", value: "embeddings" },
                 ] as ITab[],
                 result: "",
                 isLoading: false,
@@ -167,7 +168,7 @@
         },
         computed: {
             tokensCount(): number {
-                return this.prompt.length / 4
+                return this.prompt.length / 4;
             },
 
             langCodes(): InputTextSuggestion[] {
@@ -269,6 +270,10 @@
                             res = await this.api.getImages(this.prompt, this.imageOpts.n);
                             this.result = res || "";
                             this.scrollToResult();
+                        } else if (this.tab === "embeddings") {
+                            res = await this.api.getEmbedding({input: this.prompt});
+                            this.result = res || "";
+                            this.scrollToResult();
                         } else if (!this.textOpts.stream) {
                             res = await this.api.get(this.prompt, this.textOpts);
                             this.result = res || "";
@@ -276,6 +281,7 @@
                         } else {
                             const fData = (delta: string, json: any, raw: string) => {
                                 try {
+                                    console.log("fData");
                                     this.result += delta || "";
                                     this.scrollToResult();
                                 } catch (e) {
@@ -286,6 +292,7 @@
                                 console.log("END");
                             };
                             const stream = await this.api.getStream(this.prompt, fData, fEnd, this.textOpts); // await openAIStream({messages: [{role: 'user', content: this.prompt}], stream: true, model: this.textOpts?.model} as any, this.apiKey);
+                            console.log("END stream");
                         }
                     } catch (e: any) {
                         console.error("App error: " + e);
@@ -315,6 +322,9 @@
 
             const savedKey = localStorage.getItem("key");
             if (!savedKey) this.apiKeyNeeded = true;
+        },
+
+        watch: {
         },
     });
 </script>
