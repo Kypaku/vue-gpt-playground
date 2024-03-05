@@ -11,7 +11,7 @@
     "abort-controller": "^3.0.0",
     "autoprefixer": "^9.8.8",
     "core-js": "^3.6.5",
-    "eventsource-parser": "^1.0.0",
+    "eventsource-parser": "^1.1.2",
     "gpt-simple-api-ts": "^1.0.37",
     "local-storage": "^2.0.0",
     "openai": "^3.3.0",
