@@ -12,7 +12,7 @@
     "autoprefixer": "^9.8.8",
     "core-js": "^3.6.5",
     "eventsource-parser": "^1.0.0",
-    "gpt-simple-api-ts": "^1.0.37",
+    "gpt-simple-api-ts": "^1.0.38",
     "local-storage": "^2.0.0",
     "openai": "^3.3.0",
     "postcss": "^8",
